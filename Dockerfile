@@ -1,0 +1,53 @@
+FROM python:3.10-slim
+
+#  arguments
+ARG DEV_MODE
+ARG USERNAME
+ARG USER_UID
+ARG USER_GID
+
+# environment
+ENV PYTHONFAULTHANDLER=1 \
+	PYTHONUNBUFFERED=1 \
+	PYTHONHASHSEED=random \
+	PIP_NO_CACHE_DIR=off \
+	PIP_DISABLE_PIP_VERSION_CHECK=on \
+	PIP_DEFAULT_TIMEOUT=100 \
+	POETRY_VERSION=1.1.13 \
+	POETRY_VERSION=1.3.1 \
+	URLLIB_VERSION=1.26.15 \
+	DAGSTER_HOME=/opt/dagster/dagster_home 
+
+# create a non root user and install sudo
+RUN	groupadd --gid $USER_GID $USERNAME \
+	&& useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+	&& apt-get update \
+	&& apt-get install -y sudo \
+	&& echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+	&& chmod 0440 /etc/sudoers.d/$USERNAME
+
+# create a directory and make it accessible to the user
+RUN mkdir /app
+RUN chown -R $USERNAME:$USERNAME /app
+
+# poetry
+RUN pip install "poetry==$POETRY_VERSION" "urllib3==$URLLIB_VERSION"
+ENV PATH="${PATH}:/home/${USERNAME}/.local/bin"
+
+# copy only requirements to cache them in docker layer
+WORKDIR /app
+COPY src/pyproject.toml /app/
+
+# project initialization
+RUN poetry config virtualenvs.create false \
+	&& poetry install $(test "${DEV_MODE}" != prototype && echo "--no-dev") --no-interaction --no-ansi
+
+USER $USERNAME
+# creating folders, and files for a project
+COPY src/ /app/src/
+
+ENV PYTHONPATH "${PYTHONPATH}:/app/src"
+
+# run
+WORKDIR /app/src/
+CMD ["python", "main.py"]

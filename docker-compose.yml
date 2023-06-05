@@ -1,0 +1,20 @@
+version: "3.0"
+
+services:
+
+  solexiv:
+    build:
+      context: .
+      args:
+        DEV_MODE: prototype
+        USERNAME: ${USER}
+        USER_UID: 1000
+        USER_GID: 1000
+    image: solexiv/solexiv
+    container_name: solexiv
+    volumes:
+      - ./data:/app/data
+    ports:
+      - 8181:8181
+    restart: 'unless-stopped'
+    command: streamlit run Homepage.py --server.port 8181 --server.address 0.0.0.0 --browser.gatherUsageStats False
