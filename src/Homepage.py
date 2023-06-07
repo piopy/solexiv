@@ -5,6 +5,7 @@ import bcrypt
 from pathlib import Path
 import json
 from PIL import Image
+from utils.many_utils import crea_tabella_utente
 from utils.many_utils import PATH
 from utils.session_utils import (
     recupera_sessione_attiva,
@@ -104,6 +105,7 @@ def login():
     if st.session_state["user"]:
         st.title(f"Ciao, {st.session_state.user.title()}!")
         st.success("<- Ora puoi navigare tra le pagine")
+        crea_tabella_utente(st.session_state["user"])
         if st.button("Logout"):
             st.session_state["user"] = None
             st.session_state["password"] = None
@@ -116,6 +118,7 @@ def login():
         )
 
         st.stop()
+
     crea_tabella_utenti()
 
     st.title("ACCESSO")
