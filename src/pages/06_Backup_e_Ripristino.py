@@ -1,5 +1,4 @@
 import streamlit as st
-import shutil
 from pathlib import Path
 from utils.many_utils import PATH
 import json
@@ -95,5 +94,4 @@ def main():
 
 
 # Esecuzione dell'applicazione principale
-if __name__ == "__main__":
-    main()
+main()
