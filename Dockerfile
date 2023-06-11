@@ -37,8 +37,8 @@ COPY data/ /app/data/
 COPY creds/creds.sample.json /app/creds/creds.json
 
 ENV PYTHONPATH "${PYTHONPATH}:/app/src"
-EXPOSE 80
+EXPOSE 8181
 
 # run
 WORKDIR /app/src/
-CMD ["streamlit", "run", "Homepage.py", "--server.port", "80", "--server.address", "0.0.0.0" , "--browser.gatherUsageStats", "False"]
+CMD ["streamlit", "run", "Homepage.py", "--server.port", "8181", "--server.address", "0.0.0.0" , "--browser.gatherUsageStats", "False"]
