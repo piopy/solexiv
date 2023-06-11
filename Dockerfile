@@ -40,4 +40,4 @@ ENV PYTHONPATH "${PYTHONPATH}:/app/src"
 
 # run
 WORKDIR /app/src/
-CMD ["streamlit", "run", "Homepage.py", "--server.port", "8080", "--server.address", "0.0.0.0" , "--browser.gatherUsageStats", "False"]
+CMD ["streamlit", "run", "Homepage.py", "--server.port", "443", "--server.address", "0.0.0.0" , "--browser.gatherUsageStats", "False"]
