@@ -14,6 +14,7 @@ services:
     container_name: solexiv
     volumes:
       - ./data:/app/data
+      - ./creds:/app/creds
     ports:
       - 8181:8181
     restart: 'unless-stopped'
