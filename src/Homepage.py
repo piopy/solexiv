@@ -112,6 +112,11 @@ def login():
             st.success("Hai effettuato il logout")
             rimuovi_sessione_attiva(st)
             st.experimental_rerun()
+        if st.button("Cancella account"):
+            if st.button("Conferma"):
+                # TODO
+                st.error("Funzione no implementata")
+
         st.image(
             "https://media.giphy.com/media/Zhpvn5KvGEvJu/giphy.gif",
             use_column_width=True,
