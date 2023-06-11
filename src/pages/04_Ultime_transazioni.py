@@ -45,11 +45,9 @@ else:
 
 
 def ottieni_ultime_transazioni(conto_corrente):
-    # Connessione al database
     conn = sqlite3.connect(Path(PATH, "utente_" + st.session_state["user"] + ".db"))
     c = conn.cursor()
 
-    # Esecuzione della query per ottenere le ultime 20 transazioni del conto corrente
     c.execute(
         f"""
     SELECT data as data ,tipo , printf("%.2f", importo) ,categoria , descrizione, note
@@ -60,7 +58,6 @@ def ottieni_ultime_transazioni(conto_corrente):
     )
     transazioni = c.fetchall()
 
-    # Chiusura della connessione al database
     conn.close()
 
     return transazioni
@@ -74,10 +71,8 @@ def mostra_ultime_transazioni():
     conto_corrente_selezionato = st.selectbox(
         "Seleziona il conto corrente", conti_correnti
     )
-    # Seleziona le ultime 20 transazioni del conto corrente selezionato
     transazioni = ottieni_ultime_transazioni(conto_corrente_selezionato)
 
-    # Mostra le transazioni in una tabella
     st.write("Ultime 20 transazioni:")
     st.table(
         pd.DataFrame(
@@ -87,5 +82,4 @@ def mostra_ultime_transazioni():
     )
 
 
-# Chiamata alla funzione per mostrare le ultime transazioni
 mostra_ultime_transazioni()

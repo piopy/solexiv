@@ -42,7 +42,7 @@ COPY src/pyproject.toml /app/
 RUN poetry config virtualenvs.create false \
 	&& poetry install $(test "${DEV_MODE}" != prototype && echo "--no-dev") --no-interaction --no-ansi
 
-USER $USERNAME
+# USER $USERNAME
 # creating folders, and files for a project
 COPY src/ /app/src/
 
