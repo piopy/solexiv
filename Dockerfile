@@ -37,6 +37,7 @@ COPY data/ /app/data/
 COPY creds/creds.sample.json /app/creds/creds.json
 
 ENV PYTHONPATH "${PYTHONPATH}:/app/src"
+EXPOSE 80
 
 # run
 WORKDIR /app/src/
