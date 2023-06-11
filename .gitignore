@@ -158,3 +158,6 @@ data/*
 *.lock
 jupyter/**
 TODO
+creds/**
+!creds/*.sample.*
+temp/**
