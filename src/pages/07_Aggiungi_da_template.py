@@ -76,7 +76,7 @@ def injection(file):
 def aggiungi_da_template():
     st.markdown("### Template:")
     try:
-        with open(Path("..", "data", "template.xlsx"), "rb") as file:
+        with open(Path("..", "data", "Template.xlsx"), "rb") as file:
             data = file.read()
         if st.download_button(
             "Scarica il template", data=data, file_name="Template.xlsx"
