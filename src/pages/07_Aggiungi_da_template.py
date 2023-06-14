@@ -43,19 +43,31 @@ else:
     st.error("Non sei autenticato, torna alla pagina di login")
     st.stop()
 
+
 def injection(file):
-    df = pd.read_excel(file,sheet_name='Template').dropna(subset=['Data','Tipo','Importo','Categoria','Conto corrente']).fillna('')
+    df = (
+        pd.read_excel(file, sheet_name="Template")
+        .dropna(subset=["Data", "Tipo", "Importo", "Categoria", "Conto corrente"])
+        .fillna("")
+    )
     conn = sqlite3.connect(Path(PATH, "utente_" + st.session_state["user"] + ".db"))
     c = conn.cursor()
-    
+
     for _, row in df.iterrows():
         c.execute(
             """INSERT INTO transazioni_utente 
             (data, descrizione, tipo, importo, categoria, conto_corrente, note) 
             VALUES (?, ?, ?, ?, ?, ?, ?)
-            """,(
-            str(row['Data']),  row['Descrizione'],row['Tipo'], row['Importo'],  row['Categoria'],row['Conto corrente'], row['Note']
-            )
+            """,
+            (
+                str(row["Data"]),
+                row["Descrizione"],
+                row["Tipo"],
+                row["Importo"],
+                row["Categoria"],
+                row["Conto corrente"],
+                row["Note"],
+            ),
         )
     conn.commit()
     conn.close()
@@ -63,12 +75,14 @@ def injection(file):
 
 def aggiungi_da_template():
     st.markdown("### Template:")
-    if os.path.exists(Path(PATH,"template.xlsx")):
-        with open(Path(PATH,"template.xlsx"), "rb") as file:
+    try:
+        with open(Path("..", "data", "template.xlsx"), "rb") as file:
             data = file.read()
-        if st.download_button("Scarica il template", data=data, file_name="Template.xlsx"):
+        if st.download_button(
+            "Scarica il template", data=data, file_name="Template.xlsx"
+        ):
             st.success("Template scaricato")
-    else:
+    except:
         st.error("Template non disponibile")
     st.write("Una volta compilato, carica qui il template")
     template_file = st.file_uploader(
@@ -81,7 +95,6 @@ def aggiungi_da_template():
                 st.success("Transazioni aggiunte con successo")
             except:
                 st.error("Qualcosa è andato storto")
-
 
 
 #################
