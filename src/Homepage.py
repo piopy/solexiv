@@ -143,6 +143,8 @@ def login():
     password = st.text_input("Password", type="password")
     if os.getenv("SAFEBOX", 0) == 0:
         persistenza = st.checkbox("Ricordami")
+    else:
+        persistenza = False
 
     # Controllo dell'autenticazione
     if st.button("Accedi"):
@@ -163,6 +165,9 @@ def login():
         if esito:
             st.success(
                 "Registrazione effettuata con successo. Ora puoi effettuare l'accesso."
+            )
+            st.warning(
+                "Attenzione! Su questo server gli utenti potrebbero cancellarsi in seguito a rilasci o a pulizia del dominio del server.\nCi dispiace per l'inconveniente."
             )
             st.balloons()
 
