@@ -13,7 +13,7 @@ services:
     image: solexiv/solexiv
     container_name: solexiv
     environment:
-      - SAFEBOX=0
+      - SAFEBOX=1
     volumes:
       - ./data:/app/data
       - ./creds:/app/creds
