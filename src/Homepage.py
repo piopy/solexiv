@@ -1,11 +1,11 @@
 import os
+from time import sleep
 import streamlit as st
 import sqlite3
 import bcrypt
 from pathlib import Path
-import json
 from PIL import Image
-from utils.many_utils import crea_tabella_utente
+from utils.many_utils import crea_tabella_utente, cancella_account
 from utils.many_utils import PATH
 from utils.session_utils import (
     recupera_sessione_attiva,
@@ -112,10 +112,22 @@ def login():
             st.success("Hai effettuato il logout")
             rimuovi_sessione_attiva(st)
             st.experimental_rerun()
-        if st.button("Cancella account"):
-            if st.button("Conferma"):
-                # TODO
-                st.error("Funzione no implementata")
+        if st.button(
+            "Cancella account - Attenzione! Verrà eliminato anche il database!"
+        ):
+            cancella_account(st.session_state["user"])
+            st.session_state["user"] = None
+            st.session_state["password"] = None
+            rimuovi_sessione_attiva(st)
+            st.image(
+                "https://media.giphy.com/media/o0eOCNkn7cSD6/giphy.gif",
+                use_column_width=False,
+            )
+            st.success(
+                "Hai eliminato l'account. Verrai rispedito alla pagina di login a breve."
+            )
+            sleep(4)
+            st.experimental_rerun()
 
         st.image(
             "https://media.giphy.com/media/Zhpvn5KvGEvJu/giphy.gif",
@@ -129,7 +141,8 @@ def login():
     st.title("ACCESSO")
     username = st.text_input("Nome utente")
     password = st.text_input("Password", type="password")
-    persistenza = st.checkbox("Ricordami")
+    if os.getenv("SAFEBOX", 0) == 0:
+        persistenza = st.checkbox("Ricordami")
 
     # Controllo dell'autenticazione
     if st.button("Accedi"):

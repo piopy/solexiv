@@ -12,6 +12,8 @@ services:
         USER_GID: 1000
     image: solexiv/solexiv
     container_name: solexiv
+    environment:
+      - SAFEBOX=0
     volumes:
       - ./data:/app/data
       - ./creds:/app/creds
