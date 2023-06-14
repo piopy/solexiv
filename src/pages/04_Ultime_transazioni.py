@@ -6,7 +6,7 @@ import streamlit as st
 import json
 
 from utils.many_utils import PATH, crea_tabella_utente, ottieni_conti_correnti
-
+from utils.vars import categorie
 from PIL import Image
 
 im = Image.open(Path(PATH, "favicon.ico"))
@@ -44,23 +44,20 @@ else:
     st.stop()
 
 
-def ottieni_ultime_transazioni(conto_corrente):
-    # Connessione al database
+def ottieni_ultime_transazioni(conto_corrente, n_transazioni=20):
     conn = sqlite3.connect(Path(PATH, "utente_" + st.session_state["user"] + ".db"))
     c = conn.cursor()
 
-    # Esecuzione della query per ottenere le ultime 20 transazioni del conto corrente
     c.execute(
         f"""
     SELECT data as data ,tipo , printf("%.2f", importo) ,categoria , descrizione, note
     FROM transazioni_utente 
     WHERE conto_corrente=? ORDER BY data DESC 
-    LIMIT 20""",
+    LIMIT {n_transazioni}""",
         (conto_corrente,),
     )
     transazioni = c.fetchall()
 
-    # Chiusura della connessione al database
     conn.close()
 
     return transazioni
@@ -74,18 +71,15 @@ def mostra_ultime_transazioni():
     conto_corrente_selezionato = st.selectbox(
         "Seleziona il conto corrente", conti_correnti
     )
-    # Seleziona le ultime 20 transazioni del conto corrente selezionato
-    transazioni = ottieni_ultime_transazioni(conto_corrente_selezionato)
-
-    # Mostra le transazioni in una tabella
-    st.write("Ultime 20 transazioni:")
-    st.table(
-        pd.DataFrame(
-            transazioni,
-            columns=["data", "tipo", "descrizione", "importo", "categoria", "note"],
-        )
+    n_transazioni = st.text_input("Transazioni visualizzate", value=20)
+    transazioni = ottieni_ultime_transazioni(conto_corrente_selezionato, n_transazioni)
+    selected = st.multiselect("Categorie", categorie, default=categorie)
+    st.write(f"Ultime {n_transazioni} transazioni:")
+    df = pd.DataFrame(
+        transazioni,
+        columns=["data", "tipo", "importo", "categoria", "descrizione", "note"],
     )
+    st.table(df[df["categoria"].isin(selected)])
 
 
-# Chiamata alla funzione per mostrare le ultime transazioni
 mostra_ultime_transazioni()

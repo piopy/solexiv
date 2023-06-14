@@ -43,12 +43,10 @@ else:
     st.stop()
 
 
-# Funzione per rimuovere le transazioni selezionate
 def rimuovi_transazioni(transazioni_selezionate, conto_corrente_selezionato):
     conn = sqlite3.connect(Path(PATH, f"utente_{st.session_state['user']}.db"))
     cursor = conn.cursor()
 
-    # Esegue la query di eliminazione per ciascuna transazione selezionata
     for id_transazione in transazioni_selezionate:
         cursor.execute(
             "DELETE FROM transazioni_utente WHERE id = ? AND conto_corrente = ?",
@@ -56,11 +54,9 @@ def rimuovi_transazioni(transazioni_selezionate, conto_corrente_selezionato):
         )
     conn.commit()
 
-    # Chiude la connessione al database
     conn.close()
 
 
-# Creazione della pagina Streamlit
 def rm_transazioni():
     st.title("Rimozione Transazioni")
 
@@ -76,7 +72,6 @@ def rm_transazioni():
 
     if conto_corrente_selezionato == None:
         st.stop()
-    # Ottiene tutte le transazioni dal database
     conn = sqlite3.connect(Path(PATH, f"utente_{st.session_state['user']}.db"))
     cursor = conn.cursor()
     cursor.execute(
@@ -86,12 +81,10 @@ def rm_transazioni():
     transazioni = cursor.fetchall()
     conn.close()
 
-    # Mostra le checkbox per selezionare le transazioni da rimuovere
     transazioni_selezionate = st.multiselect(
         "Seleziona le transazioni da rimuovere", transazioni
     )
 
-    # Bottone per rimuovere le transazioni selezionate
     if st.button("Rimuovi Transazioni"):
         if transazioni_selezionate:
             rimuovi_transazioni(transazioni_selezionate, conto_corrente_selezionato)

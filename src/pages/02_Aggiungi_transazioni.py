@@ -44,17 +44,13 @@ else:
     st.stop()
 
 
-# Pagina di aggiunta entrate e uscite
 def mostra_pagina_aggiunta_entrate_uscite():
     st.title("Aggiunta Entrate/Uscite")
 
-    # Creazione delle due colonne
     col1, col2 = st.columns(2)
     with col1:
-        # Controllo che la tabella transazioni_utente sia creata
         crea_tabella_utente(st.session_state["user"])
 
-        # Selezione del conto corrente
         conti_correnti = ottieni_conti_correnti(st.session_state["user"])
         conti_correnti.append("Altro")
         conto_corrente_selezionato = st.selectbox(
@@ -63,12 +59,10 @@ def mostra_pagina_aggiunta_entrate_uscite():
         if conto_corrente_selezionato == "Altro":
             cc_rivisto = st.text_input("Inserire conto corrente")
 
-        # Selezione del tipo di transazione (Entrata/Uscita)
         tipo_transazione = st.selectbox(
             "Seleziona il tipo di transazione", ["Entrata", "Uscita"]
         )
 
-        # Inserimento dei dati della transazione
         data_transazione = st.date_input("Data della transazione")
         descrizione = st.text_input("Descrizione")
 
@@ -88,11 +82,8 @@ def mostra_pagina_aggiunta_entrate_uscite():
         # ]
         categoria = st.selectbox("Seleziona la categoria", categorie)
 
-        # Aggiungo note
-
         note = st.text_area("Inserire nota")
 
-        # Aggiunta della transazione al database
         if st.button("Aggiungi Transazione"):
             if conto_corrente_selezionato == "Altro":
                 conto_corrente = cc_rivisto

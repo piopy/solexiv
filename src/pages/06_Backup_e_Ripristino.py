@@ -2,7 +2,7 @@ import sqlite3
 from pymongo import MongoClient
 import streamlit as st
 from pathlib import Path
-from utils.many_utils import crea_tabella_utente
+from utils.many_utils import crea_tabella_utente, db_isempty
 from utils.many_utils import PATH
 import json
 import os
@@ -49,6 +49,8 @@ else:
 
 # Funzione per il download del database
 def download_database():
+    empty = db_isempty(st.session_state["user"])
+
     db_file = Path(PATH, f"utente_{st.session_state['user']}.db")
     download_file_name = f"utente_{st.session_state['user']}.db"
     try:
@@ -59,6 +61,7 @@ def download_database():
                 "Clicca qui per scaricare il database",
                 data,
                 file_name=download_file_name,
+                disabled=empty,
             ):
                 st.success("Database scaricato")
         else:
@@ -70,6 +73,7 @@ def download_database():
 def main_():
     st.markdown("### Da file")
     col1, col2 = st.columns(2)
+    crea_tabella_utente(st.session_state["user"])
 
     with col1:
         st.markdown("Download del Database")
@@ -82,6 +86,7 @@ def main_():
             accept_multiple_files=False,
         )
         if backup_file is not None:
+            st.warning("Attenzione! Questo sovrascriverà l'attuale database locale!")
             if st.button("Ripristina"):
                 try:
                     with open(
@@ -137,7 +142,7 @@ def main():
     data = {}
     st.markdown("### MongoDB")
     crea_tabella_utente(st.session_state["user"])
-
+    empty = db_isempty(st.session_state["user"])
     if os.path.exists(Path("..", "creds", "creds.json")):
         with open(Path("..", "creds", "creds.json"), "r") as f:
             data = json.load(f)
@@ -152,7 +157,8 @@ def main():
             uri += "/?retryWrites=true&w=majority"
     col3, col4 = st.columns(2)
     with col3:
-        if st.button("Backup"):
+        st.warning("Attenzione! Questo sovrascriverà l'attuale database su MongoDB!")
+        if st.button("Backup", disabled=empty):
             coll = get_collection(uri)
             transazioni = get_transazioni()
             # Prima cancello
@@ -162,6 +168,7 @@ def main():
 
             st.success(f"Effettuato il backup di {len(a)} transazioni")
     with col4:
+        st.warning("Attenzione! Questo sovrascriverà l'attuale database locale!")
         if st.button("Ripristina"):
             coll = get_collection(uri)
             transazioni = [t for t in coll.find()]
@@ -188,7 +195,15 @@ def main():
                     INSERT INTO transazioni_utente (data, descrizione, tipo, importo, categoria, conto_corrente, note)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
-                    (data, descrizione, tipo, importo, categoria, conto_corrente, note),
+                    (
+                        data,
+                        descrizione,
+                        tipo,
+                        importo,
+                        categoria,
+                        conto_corrente,
+                        note,
+                    ),
                 )
             conn_sqlite.commit()
             conn_sqlite.close()
