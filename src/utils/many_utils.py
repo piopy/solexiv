@@ -1,9 +1,49 @@
+import json
 import sqlite3
 from pathlib import Path
 from datetime import datetime
+from PIL import Image
 import os
 
 PATH = "../data/"
+
+
+def logo_and_page_title(st):
+    im = Image.open(Path(PATH, "favicon.ico"))
+    st.set_page_config(
+        page_title="SOLEXIV",
+        page_icon=im,
+        layout="wide",
+    )
+
+    hide_streamlit_style = """
+                <style>
+                #MainMenu {visibility: hidden;}
+                footer {visibility: hidden;}
+                </style>
+                """
+    st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+
+def check_active_session(st, title):
+    if os.path.exists(Path(PATH, "_active_session")):
+        with open(Path(PATH, "_active_session"), "r") as f:
+            dizi = json.load(f)
+            st.session_state["user"] = dizi["username"]
+            st.session_state["password"] = dizi["hash_pw"]
+            st.session_state["encrypted"] = dizi["encrypted"]
+
+    if st.session_state.user:
+        if st.session_state.encrypted:
+            st.error(
+                "Il tuo archivio è crittografato, sbloccalo nella pagina di sicurezza."
+            )
+            st.stop()
+        st.title(f"Ciao, {st.session_state.user.title()}")
+        st.markdown(f"### {title}")
+    else:
+        st.error("Non sei autenticato, torna alla pagina di login")
+        st.stop()
 
 
 def cancella_account(user):
@@ -22,24 +62,6 @@ def db_isempty(user):
     if len(res) == 0:
         return True
     return False
-
-
-def crea_tabella_utente(username):
-    conn = sqlite3.connect(Path(PATH, f"utente_{username}.db"))
-    c = conn.cursor()
-    c.execute(
-        """CREATE TABLE IF NOT EXISTS transazioni_utente (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    data TEXT,
-                    descrizione TEXT,
-                    tipo TEXT,
-                    importo REAL,
-                    categoria TEXT,
-                    conto_corrente TEXT,
-                    note TEXT)"""
-    )
-    conn.commit()
-    conn.close()
 
 
 def ottieni_conti_correnti(username):
