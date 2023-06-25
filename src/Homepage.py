@@ -73,7 +73,7 @@ def login():
                         i += 1
 
         # Scadenze
-        with st.expander("Scadenze"):
+        with st.expander("Scadenze", True):
             # st.markdown("## Scadenze")
             scadenze = get_scadenze(st)
             scadenze_non_completate = scadenze[scadenze["completata"].lt(1)]
