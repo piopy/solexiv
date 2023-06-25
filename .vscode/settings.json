@@ -12,4 +12,5 @@
   "window.zoomLevel": 1,
   "python.analysis.typeCheckingMode": "off",
   "python.formatting.provider": "black",
+  "workbench.colorTheme": "Visual Studio Dark"
 }

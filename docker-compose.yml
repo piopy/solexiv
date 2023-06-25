@@ -7,15 +7,17 @@ services:
       context: .
       args:
         DEV_MODE: prototype
-        USERNAME: ${USER}
+        USERNAME: piopy
         USER_UID: 1000
         USER_GID: 1000
+    # working_dir: /app/src
     image: solexiv/solexiv
     container_name: solexiv
     environment:
       - SAFEBOX=0
     volumes:
       - ./data:/app/data
+      - ./src:/app/src
       - ./creds:/app/creds
     ports:
       - 8181:8181

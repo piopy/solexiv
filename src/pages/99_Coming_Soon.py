@@ -1,25 +1,9 @@
 import streamlit as st
-from pathlib import Path
 
 
-from PIL import Image
+from utils.many_utils import logo_and_page_title
 
-from utils.many_utils import PATH
-
-im = Image.open(Path(PATH, "favicon.ico"))
-st.set_page_config(
-    page_title="SOLEXIV",
-    page_icon=im,
-    layout="wide",
-)
-
-hide_streamlit_style = """
-            <style>
-            #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
-            </style>
-            """
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+logo_and_page_title(st)
 
 
 def main():
@@ -36,9 +20,7 @@ def main():
 
     st.markdown(
         """
-    - [ ] Panoramica conti
     - [ ] Previsione del bilancio futuro
-    - [ ] Ricerca delle transazioni per data, descrizione o importo
     - [ ] Notifiche per scadenze, pagamenti o obiettivi di risparmio
     """
     )
