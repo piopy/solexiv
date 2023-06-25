@@ -28,20 +28,3 @@ def rimuovi_sessione_attiva(st):
     except:
         return False
     return True
-
-
-def modifica_session_encrypted(st, encrypted):
-    if os.path.exists(Path(PATH, "_active_session")):
-        with open(Path(PATH, "_active_session"), "r") as f:
-            dizi = json.load(f)
-            st.session_state["user"] = dizi["username"]
-            st.session_state["password"] = dizi["hash_pw"]
-
-        st.session_state["encrypted"] = encrypted
-        with open(Path(PATH, "_active_session"), "w") as f:
-            dizi = {
-                "username": st.session_state["user"],
-                "hash_pw": st.session_state["password"],
-                "encrypted": st.session_state["encrypted"],
-            }
-            f.write(json.dumps(dizi))
