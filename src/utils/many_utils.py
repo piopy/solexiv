@@ -9,12 +9,18 @@ PATH = "../data/"
 
 
 def logo_and_page_title(st):
-    im = Image.open(Path(PATH, "favicon.ico"))
-    st.set_page_config(
-        page_title="SOLEXIV",
-        page_icon=im,
-        layout="wide",
-    )
+    try:
+        im = Image.open(Path(PATH, "favicon.ico"))
+        st.set_page_config(
+            page_title="SOLEXIV",
+            page_icon=im,
+            layout="wide",
+        )
+    except:
+        st.set_page_config(
+            page_title="SOLEXIV",
+            layout="wide",
+        )
 
     hide_streamlit_style = """
                 <style>

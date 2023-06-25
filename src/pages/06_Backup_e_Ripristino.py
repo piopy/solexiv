@@ -3,7 +3,8 @@ from pathlib import Path
 from logica_applicativa.Backup_e_ripristino import (
     backup_su_mongo,
     download_database,
-    get_collection,
+    get_collection_scadenze,
+    get_collection_transazioni,
     get_transazioni,
     ripristina_da_file,
     ripristina_da_mongo,
@@ -70,15 +71,21 @@ def main():
     with col3:
         st.warning("Attenzione! Questo sovrascriverà l'attuale database su MongoDB!")
         if st.button("Backup", disabled=empty):
-            coll = get_collection(st, uri)
+            # backup transazioni
+            coll = get_collection_transazioni(st, uri)
             transazioni = get_transazioni(st)
             a = backup_su_mongo(coll, transazioni)
 
             st.success(f"Effettuato il backup di {len(a)} transazioni")
+
+            # backup scadenze
+            coll_scad = get_collection_scadenze(st, uri)
+            # ...
+
     with col4:
         st.warning("Attenzione! Questo sovrascriverà l'attuale database locale!")
         if st.button("Ripristina"):
-            coll = get_collection(st, uri)
+            coll = get_collection_transazioni(st, uri)
 
             transazioni = ripristina_da_mongo(st, coll)
             st.success(f"Effettuato il ripristino di {len(transazioni)} transazioni")

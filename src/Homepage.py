@@ -10,6 +10,7 @@ from logica_applicativa.Creazioni_tabelle import (
 )
 from logica_applicativa.Dashboard import andamento_patrimonio
 from logica_applicativa.Mainpage import autenticazione, crea_utente
+from logica_applicativa.Scadenze import genera_body_scadenza, get_scadenze
 from utils.many_utils import (
     cancella_account,
     logo_and_page_title,
@@ -41,49 +42,90 @@ def login():
         crea_tabella_utente(st.session_state["user"])
         crea_tabella_scadenze(st)
 
+        logout_col, delete_account_col = st.columns([1, 2])
+
         # logout
-        if st.button("Logout"):
-            st.session_state["user"] = None
-            st.session_state["password"] = None
-            st.success("Hai effettuato il logout")
-            rimuovi_sessione_attiva(st)
-            st.experimental_rerun()
+        with logout_col:
+            if st.button("Logout"):
+                st.session_state["user"] = None
+                st.session_state["password"] = None
+                st.success("Hai effettuato il logout")
+                rimuovi_sessione_attiva(st)
+                st.experimental_rerun()
         # cancella account
-        if st.button(
-            "Cancella account - Attenzione! Verrà eliminato anche il database!"
-        ):
-            cancella_account(st.session_state["user"])
-            st.session_state["user"] = None
-            st.session_state["password"] = None
-            rimuovi_sessione_attiva(st)
-            st.image(
-                "https://media.giphy.com/media/o0eOCNkn7cSD6/giphy.gif",
-                use_column_width=False,
-            )
-            st.success(
-                "Hai eliminato l'account. Verrai rispedito alla pagina di login a breve."
-            )
-            sleep(4)
-            st.experimental_rerun()
+        with delete_account_col:
+            if st.button(
+                "Cancella account - Attenzione! Verrà eliminato anche il database!"
+            ):
+                cancella_account(st.session_state["user"])
+                st.session_state["user"] = None
+                st.session_state["password"] = None
+                rimuovi_sessione_attiva(st)
+                st.image(
+                    "https://media.giphy.com/media/o0eOCNkn7cSD6/giphy.gif",
+                    use_column_width=False,
+                )
+                st.success(
+                    "Hai eliminato l'account. Verrai rispedito alla pagina di login a breve."
+                )
+                sleep(4)
+                st.experimental_rerun()
 
         #### CARDS
+        card_cols = st.columns(2)
 
         if len(ottieni_conti_correnti(st.session_state["user"])) > 0:
             # Cards
+            st.markdown("## Situazione finanziaria")
             conti = ottieni_conti_correnti(st.session_state["user"])
-            conti_column, notifiche_column = st.columns(2)
-            with conti_column:
-                for conto_corrente in conti:
+            i = 0
+            for conto_corrente in conti:
+                with card_cols[i % 2]:
                     DB = Path(PATH, f"utente_{st.session_state.user}.db")
                     storico = andamento_patrimonio(DB, conto_corrente)
                     value = storico.tail(1)["patrimonio"].values[0].round(2)
                     card(
                         title=conto_corrente,
-                        text=value,
+                        text=f"{value} €",
                         on_click=lambda: 1,
                     )
-            with notifiche_column:
-                st.warning("Coming soon")
+                    if value < 50:
+                        st.warning(
+                            f"{conto_corrente} - Attenzione: il saldo di questo conto inizia ad essere basso!"
+                        )
+                    i += 1
+
+        # Metto gli stacchetti fighi
+        for c in card_cols:
+            c.markdown("---")
+        # Scadenze
+        st.markdown("## Scadenze")
+        scadenze = get_scadenze(st)
+        scadenze_non_completate = scadenze[scadenze["completata"].lt(1)]
+        if scadenze_non_completate.shape[0] > 0:
+            st.warning("Scadenze in avvicinamento")
+        else:
+            st.success("Non hai scadenze in elenco")
+
+        for i, s in scadenze_non_completate.iterrows():
+            body = genera_body_scadenza(s)
+            st.code(
+                body,
+                language="json",
+            )
+
+            st.markdown("---")
+
+        if scadenze[scadenze["completata"].gt(0)].shape[0] > 0:
+            st.markdown("### Scadenze completate")
+            for i, s in scadenze[scadenze["completata"].gt(0)].iterrows():
+                body = genera_body_scadenza(s)
+                st.code(
+                    body,
+                    language="json",
+                )
+
+            st.markdown("---")
 
         st.image(
             "https://media.giphy.com/media/Zhpvn5KvGEvJu/giphy.gif",

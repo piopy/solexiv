@@ -90,12 +90,26 @@ def ripristina_da_mongo(st, coll):
     return transazioni
 
 
-def get_collection(
+def get_collection_transazioni(
     st,
     mongo_uri,
     mongo_db="solexiv_db",
 ):
     mongo_collection = f"utente_{st.session_state['user']}"
+
+    client = MongoClient(mongo_uri)
+    db = client[mongo_db]
+    collection = db[mongo_collection]
+
+    return collection
+
+
+def get_collection_scadenze(
+    st,
+    mongo_uri,
+    mongo_db="solexiv_db",
+):
+    mongo_collection = f"scadenze_{st.session_state['user']}"
 
     client = MongoClient(mongo_uri)
     db = client[mongo_db]
