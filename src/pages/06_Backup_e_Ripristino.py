@@ -5,9 +5,11 @@ from logica_applicativa.Backup_e_ripristino import (
     download_database,
     get_collection_scadenze,
     get_collection_transazioni,
+    get_scadenze,
     get_transazioni,
     ripristina_da_file,
-    ripristina_da_mongo,
+    ripristina_scadenze_da_mongo,
+    ripristina_transazioni_da_mongo,
 )
 from utils.many_utils import (
     check_active_session,
@@ -80,15 +82,22 @@ def main():
 
             # backup scadenze
             coll_scad = get_collection_scadenze(st, uri)
-            # ...
+            scadenze = get_scadenze(st)
+            b = backup_su_mongo(coll_scad, scadenze)
+            st.success(f"Effettuato il backup di {len(b)} scadenze")
 
     with col4:
         st.warning("Attenzione! Questo sovrascriverà l'attuale database locale!")
         if st.button("Ripristina"):
+            # ripristino transazioni
             coll = get_collection_transazioni(st, uri)
-
-            transazioni = ripristina_da_mongo(st, coll)
+            transazioni = ripristina_transazioni_da_mongo(st, coll)
             st.success(f"Effettuato il ripristino di {len(transazioni)} transazioni")
+
+            # ripristino scadenze
+            coll_scad = get_collection_scadenze(st, uri)
+            scadenze = ripristina_scadenze_da_mongo(st, coll_scad)
+            st.success(f"Effettuato il ripristino di {len(scadenze)} scadenze")
 
 
 #########################

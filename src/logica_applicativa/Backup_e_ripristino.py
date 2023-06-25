@@ -51,7 +51,7 @@ def get_all_data_mongo_collection(coll):
     return [t for t in coll.find()]
 
 
-def ripristina_da_mongo(st, coll):
+def ripristina_transazioni_da_mongo(st, coll):
     transazioni = get_all_data_mongo_collection(coll)
     db_file = Path(PATH, f'utente_{st.session_state["user"]}.db')
     conn_sqlite = sqlite3.connect(db_file)
@@ -88,6 +88,52 @@ def ripristina_da_mongo(st, coll):
     conn_sqlite.commit()
     conn_sqlite.close()
     return transazioni
+
+
+def ripristina_scadenze_da_mongo(st, coll):
+    scadenze = get_all_data_mongo_collection(coll)
+    db_file = Path(PATH, f'utente_{st.session_state["user"]}.db')
+    conn_sqlite = sqlite3.connect(db_file)
+    cursor = conn_sqlite.cursor()
+
+    # Prima cancello
+    cursor.execute("DELETE FROM scadenze")
+
+    # Poi popolo
+    for record in scadenze:
+        # id = record.get("id")
+        nome = record.get("nome")
+        data_inserimento = record.get("data_inserimento")
+        data_scadenza = record.get("data_scadenza")
+        data_completamento = record.get("data_completamento")
+        dettagli = record.get("dettagli")
+        importo = record.get("importo")
+        categoria = record.get("categoria")
+        frequenza = record.get("frequenza")
+        notifiche = record.get("notifiche")
+        completata = record.get("completata")
+
+        cursor.execute(
+            """
+            INSERT INTO scadenze (nome, data_inserimento, data_scadenza, data_completamento, dettagli, importo, categoria, frequenza, notifiche,completata)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+            (
+                nome,
+                data_inserimento,
+                data_scadenza,
+                data_completamento,
+                dettagli,
+                importo,
+                categoria,
+                frequenza,
+                notifiche,
+                completata,
+            ),
+        )
+    conn_sqlite.commit()
+    conn_sqlite.close()
+    return scadenze
 
 
 def get_collection_transazioni(
@@ -140,3 +186,30 @@ def get_transazioni(st):
         transazioni.append(transazione)
     conn_sqlite.close()
     return transazioni
+
+
+def get_scadenze(st):
+    db_file = Path(PATH, f'utente_{st.session_state["user"]}.db')
+    conn_sqlite = sqlite3.connect(db_file)
+    cursor_sqlite = conn_sqlite.cursor()
+    cursor_sqlite.execute("SELECT * FROM scadenze")
+
+    rows = cursor_sqlite.fetchall()
+    scadenze = []
+    for row in rows:
+        scadenza = {
+            "id": row[0],
+            "nome": row[1],
+            "data_inserimento": row[2],
+            "data_scadenza": row[3],
+            "data_completamento": row[4],
+            "dettagli": row[5],
+            "importo": row[6],
+            "categoria": row[7],
+            "frequenza": row[8],
+            "notifiche": row[9],
+            "completata": row[10],
+        }
+        scadenze.append(scadenza)
+    conn_sqlite.close()
+    return scadenze
