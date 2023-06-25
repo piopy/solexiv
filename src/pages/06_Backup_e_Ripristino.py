@@ -28,7 +28,7 @@ check_active_session(
 
 
 def main_():
-    st.markdown("### Da file")
+    # st.markdown("### Da file")
     col1, col2 = st.columns(2)
     crea_tabella_utente(st.session_state["user"])
 
@@ -54,7 +54,7 @@ def main_():
 def main():
     uri = ""
     data = {}
-    st.markdown("### MongoDB")
+    # st.markdown("### MongoDB")
     crea_tabella_utente(st.session_state["user"])
     empty = db_isempty(st.session_state["user"])
     if os.path.exists(Path("..", "creds", "creds.json")):
@@ -102,5 +102,7 @@ def main():
 
 #########################
 
-main_()
-main()
+with st.expander("Operazioni su file"):
+    main_()
+with st.expander("Operazioni su MongoDB"):
+    main()

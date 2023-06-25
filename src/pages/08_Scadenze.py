@@ -19,8 +19,6 @@ logo_and_page_title(st)
 check_active_session(st, "Qui puoi aggiungere scadenze")
 
 
-# TODO
-# Codice da rivedere
 def mostra_pagina_scadenze():
     st.header("Aggiungi una nuova scadenza")
     nome = st.text_input("Nome")
@@ -68,32 +66,34 @@ def mostra_pagina_scadenze():
     #         )
 
     #         st.markdown("---")
+    st.markdown("---")
+    with st.expander("Segna una scadenza come completata"):
+        # st.header("Segna una scadenza come completata")
+        completate = st.multiselect(
+            "Seleziona le scadenze completate",
+            scadenze_non_completate.values.tolist(),
+        )
+        if st.button("Segna come completate"):
+            if len(completate) > 0:
+                for scadenza_id in completate:
+                    aggiorna_stato_scadenza(st, str(scadenza_id[0]))
+                st.success("Scadenze segnate come completate.")
+                sleep(1)
+                st.experimental_rerun()
 
-    st.header("Segna una scadenza come completata")
-    completate = st.multiselect(
-        "Seleziona le scadenze completate",
-        scadenze_non_completate.values.tolist(),
-    )
-    if st.button("Segna come completate"):
-        if len(completate) > 0:
-            for scadenza_id in completate:
-                aggiorna_stato_scadenza(st, str(scadenza_id[0]))
-            st.success("Scadenze segnate come completate.")
-            sleep(1)
-            st.experimental_rerun()
-
-    st.header("Elimina scadenze")
-    completate = st.multiselect(
-        "Seleziona le scadenze da cancellare",
-        scadenze.values.tolist(),
-    )
-    if st.button("Elimina"):
-        if len(completate) > 0:
-            for scadenza_id in completate:
-                elimina_scadenza(st, str(scadenza_id[0]))
-            st.success("Scadenze eliminate.")
-            sleep(1)
-            st.experimental_rerun()
+    with st.expander("Elimina scadenze"):
+        # st.header("Elimina scadenze")
+        completate = st.multiselect(
+            "Seleziona le scadenze da cancellare",
+            scadenze.values.tolist(),
+        )
+        if st.button("Elimina"):
+            if len(completate) > 0:
+                for scadenza_id in completate:
+                    elimina_scadenza(st, str(scadenza_id[0]))
+                st.success("Scadenze eliminate.")
+                sleep(1)
+                st.experimental_rerun()
 
 
 mostra_pagina_scadenze()

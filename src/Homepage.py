@@ -28,6 +28,10 @@ logo_and_page_title(st)
 
 # Pagina di accesso e registrazione
 def login():
+    st.markdown(
+        "<h1 style='text-align: center; color:#8B0000;'>👑 SOLEXIV 👑</h1>",
+        unsafe_allow_html=True,
+    )
     try:
         temp = st.session_state["user"]
     except:
@@ -41,35 +45,6 @@ def login():
         st.success("<- Ora puoi navigare tra le pagine")
         crea_tabella_utente(st.session_state["user"])
         crea_tabella_scadenze(st)
-
-        logout_col, delete_account_col = st.columns([1, 2])
-
-        # logout
-        with logout_col:
-            if st.button("Logout"):
-                st.session_state["user"] = None
-                st.session_state["password"] = None
-                st.success("Hai effettuato il logout")
-                rimuovi_sessione_attiva(st)
-                st.experimental_rerun()
-        # cancella account
-        with delete_account_col:
-            if st.button(
-                "Cancella account - Attenzione! Verrà eliminato anche il database!"
-            ):
-                cancella_account(st.session_state["user"])
-                st.session_state["user"] = None
-                st.session_state["password"] = None
-                rimuovi_sessione_attiva(st)
-                st.image(
-                    "https://media.giphy.com/media/o0eOCNkn7cSD6/giphy.gif",
-                    use_column_width=False,
-                )
-                st.success(
-                    "Hai eliminato l'account. Verrai rispedito alla pagina di login a breve."
-                )
-                sleep(4)
-                st.experimental_rerun()
 
         #### CARDS
 
@@ -131,43 +106,69 @@ def login():
             "https://media.giphy.com/media/Zhpvn5KvGEvJu/giphy.gif",
             use_column_width=True,
         )
-
+        with st.expander("Cancella account"):
+            # cancella account
+            if st.button(
+                "Cancella account - Attenzione! Verrà eliminato anche il database!"
+            ):
+                cancella_account(st.session_state["user"])
+                st.session_state["user"] = None
+                st.session_state["password"] = None
+                rimuovi_sessione_attiva(st)
+                st.image(
+                    "https://media.giphy.com/media/o0eOCNkn7cSD6/giphy.gif",
+                    use_column_width=False,
+                )
+                st.success(
+                    "Hai eliminato l'account. Verrai rispedito alla pagina di login a breve."
+                )
+                sleep(4)
+                st.experimental_rerun()
+        # logout
+        if st.button("Logout"):
+            st.session_state["user"] = None
+            st.session_state["password"] = None
+            st.success("Hai effettuato il logout")
+            rimuovi_sessione_attiva(st)
+            st.experimental_rerun()
         st.stop()
 
     crea_tabella_utenti()
 
-    st.title("ACCESSO")
-    username = st.text_input("Nome utente")
-    password = st.text_input("Password", type="password")
-    if os.getenv("SAFEBOX", 0) == 0:
-        persistenza = st.checkbox("Ricordami")
-    else:
-        persistenza = False
-
-    # Controllo dell'autenticazione
-    if st.button("Accedi"):
-        # Input del nome utente
-        if autenticazione(st, username, password, persistenza):
-            st.success("Accesso effettuato con successo.")
-            st.experimental_rerun()
+    with st.expander("**ACCESSO**", True):
+        # st.title("ACCESSO")
+        username = st.text_input("Nome utente")
+        password = st.text_input("Password", type="password")
+        if os.getenv("SAFEBOX", 0) == 0:
+            persistenza = st.checkbox("Ricordami")
         else:
-            st.error("Nome utente o password non validi.")
+            persistenza = False
 
-    st.title("Registrazione")
+        # Controllo dell'autenticazione
+        if st.button("Accedi"):
+            # Input del nome utente
+            if autenticazione(st, username, password, persistenza):
+                st.success("Accesso effettuato con successo.")
+                st.experimental_rerun()
+            else:
+                st.error("Nome utente o password non validi.")
 
-    new_username = st.text_input("Nuovo nome utente")
-    new_password = st.text_input("Nuova password", type="password")
+    with st.expander("**REGISTRAZIONE**"):
+        # st.title("Registrazione")
 
-    if st.button("Registra"):
-        esito = crea_utente(st, new_username, new_password)
-        if esito:
-            st.success(
-                "Registrazione effettuata con successo. Ora puoi effettuare l'accesso."
-            )
-            st.warning(
-                "Attenzione! Su questo server gli utenti potrebbero cancellarsi in seguito a rilasci o a pulizia del dominio del server.\nCi dispiace per l'inconveniente."
-            )
-            st.balloons()
+        new_username = st.text_input("Nuovo nome utente")
+        new_password = st.text_input("Nuova password", type="password")
+
+        if st.button("Registra"):
+            esito = crea_utente(st, new_username, new_password)
+            if esito:
+                st.success(
+                    "Registrazione effettuata con successo. Ora puoi effettuare l'accesso."
+                )
+                st.warning(
+                    "Attenzione! Su questo server gli utenti potrebbero cancellarsi in seguito a rilasci o a pulizia del dominio del server.\nCi dispiace per l'inconveniente."
+                )
+                st.balloons()
 
 
 login()
