@@ -65,6 +65,42 @@ def andamento_patrimonio(DB, conto_corrente):
     return storico
 
 
+def ottieni_spese_per_mese_descr(DB, conto_corrente, mese_selezionato):
+    if len(str(mese_selezionato)) == 1:
+        mese_selezionato = "0" + str(mese_selezionato)
+    mese_formato = f"{datetime.now().year}-{mese_selezionato}"
+
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute(
+        """SELECT data, categoria, descrizione, SUM(importo)
+                    FROM transazioni_utente
+                    WHERE strftime('%Y-%m', data) = ? AND conto_corrente = ? AND tipo = 'Uscita'
+                    GROUP BY data, categoria, descrizione""",
+        (mese_formato, conto_corrente),
+    )
+    results = c.fetchall()
+    conn.close()
+
+    giorni = []
+    categorie = []
+    descrizioni = []
+    importi = []
+
+    for row in results:
+        giorno = row[0]
+        categoria = row[1]
+        descrizione = row[2]
+        importo = row[3]
+
+        giorni.append(giorno)
+        categorie.append(categoria)
+        descrizioni.append(descrizione + " - " + giorno)
+        importi.append(importo)
+
+    return giorni, categorie, descrizioni, importi
+
+
 def ottieni_spese_per_mese(DB, conto_corrente, mese_selezionato):
     if len(str(mese_selezionato)) == 1:
         mese_selezionato = "0" + str(mese_selezionato)

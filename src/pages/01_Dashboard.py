@@ -6,6 +6,7 @@ from logica_applicativa.Dashboard import (
     andamento_patrimonio,
     entrate_uscite,
     ottieni_spese_per_mese,
+    ottieni_spese_per_mese_descr,
     ottieni_spese_ultimi_12_mesi,
 )
 from utils.many_utils import (
@@ -19,7 +20,7 @@ import pandas as pd
 from utils.many_utils import ottieni_conti_correnti
 
 
-logo_and_page_title(st)
+# logo_and_page_title(st)
 check_active_session(st, "Ecco la tua dashboard")
 
 DB = Path(PATH, f"utente_{st.session_state.user}.db")
@@ -80,24 +81,57 @@ def mostra_pagina_resoconto_mensile():
         unsafe_allow_html=True,
     )
 
-    tupla_mese = ottieni_spese_per_mese(
-        DB,
-        conto_corrente_selezionato,
-        elenco_mesi.index(mese_selezionato) + 1,
-    )
-    df_mese = pd.DataFrame(tupla_mese, index=["Data", "Tipologia", "Importo"]).T
+    # SPESE PER CATEGORIA
+    scelta_dett = st.checkbox("Modalità dettagliata", value=False)
+    if not scelta_dett:
+        tupla_mese = ottieni_spese_per_mese(
+            DB,
+            conto_corrente_selezionato,
+            elenco_mesi.index(mese_selezionato) + 1,
+        )
+        df_mese = pd.DataFrame(tupla_mese, index=["Data", "Tipologia", "Importo"]).T
 
-    # Grafico a torta delle spese per categoria
-    fig = px.pie(df_mese, values="Importo", names="Tipologia", hole=0.3)
+        # Grafico a torta delle spese per categoria
+        fig = px.pie(df_mese, values="Importo", names="Tipologia", hole=0.3)
 
-    fig.update_traces(hoverinfo="label+percent", textfont_size=12)
+        fig.update_traces(hoverinfo="label+percent", textfont_size=12)
 
-    fig.update_layout(
-        title=f"Distribuzione delle spese per categoria nel mese di {mese_selezionato} (Conto corrente: {conto_corrente_selezionato})",
-        showlegend=True,
-    )
+        fig.update_layout(
+            title=f"Distribuzione delle spese per categoria nel mese di {mese_selezionato} (Conto corrente: {conto_corrente_selezionato})",
+            showlegend=True,
+        )
 
-    st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        tupla_mese = ottieni_spese_per_mese_descr(
+            DB,
+            conto_corrente_selezionato,
+            elenco_mesi.index(mese_selezionato) + 1,
+        )
+        df_mese_des = pd.DataFrame(
+            tupla_mese, index=["Data", "Tipologia", "Descrizione", "Importo"]
+        ).T
+        fig = px.sunburst(
+            data_frame=df_mese_des.fillna("null").assign(
+                hole=f"Spese {mese_selezionato}"
+            ),
+            path=[
+                "hole",
+                "Tipologia",
+                "Descrizione",
+            ],
+            values="Importo",
+        )
+        fig.update_traces(
+            hovertemplate="<b> %{percentParent:.2%} </b> of %{parent}<br><i>%{value:.2f}€</i>",
+        )
+        fig.update_layout(
+            autosize=False,
+            height=650,
+            margin=dict(l=0, r=0, t=20, b=20),
+            hoverlabel_font_size=18,
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
     # Ottieni i dati delle spese negli ultimi 12 mesi
     tupla_anno = ottieni_spese_ultimi_12_mesi(DB, conto_corrente_selezionato)
