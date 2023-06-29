@@ -112,24 +112,30 @@ def mostra_pagina_resoconto_mensile():
             tupla_mese, index=["Data", "Tipologia", "Descrizione", "Importo"]
         ).T
         fig = px.sunburst(
-            data_frame=df_mese_des.fillna("null").assign(
-                hole=f"Spese {mese_selezionato}"
-            ),
+            data_frame=df_mese_des.fillna(" ").assign(hole=f"Spese {mese_selezionato}"),
             path=[
                 "hole",
                 "Tipologia",
                 "Descrizione",
             ],
             values="Importo",
+            custom_data=["Descrizione", "Tipologia"],
         )
         fig.update_traces(
-            hovertemplate="<b> %{percentParent:.2%} </b> of %{parent}<br><i>%{value:.2f}€</i>",
+            hovertemplate="""
+# %{customdata[1]}/%{customdata[0]}<br>
+<b>%{percentParent:.2%}</b> of %{parent}<br>
+<i>%{value:.2f}€</i>
+"""
         )
         fig.update_layout(
             autosize=False,
             height=650,
-            margin=dict(l=0, r=0, t=20, b=20),
+            # margin=dict(l=0, r=0, t=20, b=20),
             hoverlabel_font_size=18,
+        )
+        fig.update_layout(
+            title=f"Distribuzione dettagliata delle spese per categoria nel mese di {mese_selezionato} (Conto corrente: {conto_corrente_selezionato})",
         )
         st.plotly_chart(fig, use_container_width=True)
 
