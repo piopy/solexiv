@@ -20,7 +20,7 @@ import pandas as pd
 from utils.many_utils import ottieni_conti_correnti
 
 
-# logo_and_page_title(st)
+logo_and_page_title(st)
 check_active_session(st, "Ecco la tua dashboard")
 
 DB = Path(PATH, f"utente_{st.session_state.user}.db")
@@ -72,12 +72,12 @@ def mostra_pagina_resoconto_mensile():
     )
     st.write(
         "Entrate questo mese:",
-        f"<span style='color:green'>{e[0]}€</span>",
+        f"<span style='color:green'>{e}€</span>",
         unsafe_allow_html=True,
     )
     st.write(
         "Uscite questo mese:",
-        f"<span style='color:red'>{u[0]}€</span>",
+        f"<span style='color:red'>{u}€</span>",
         unsafe_allow_html=True,
     )
 

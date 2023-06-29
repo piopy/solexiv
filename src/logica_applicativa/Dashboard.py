@@ -171,5 +171,9 @@ def entrate_uscite(DB, conto_corrente, mese_selezionato):
     entr = results[0]
 
     conn.close()
+    if float(entr[0]) > 0:
+        entr = str(float(round(entr[0], 2)))
+    if float(uscite[0]) > 0:
+        uscite = str(float(round(uscite[0], 2)))
 
-    return round(entr, 2), round(uscite, 2)
+    return entr, uscite
