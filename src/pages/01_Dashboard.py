@@ -20,7 +20,7 @@ import pandas as pd
 from utils.many_utils import ottieni_conti_correnti
 
 
-# logo_and_page_title(st)
+logo_and_page_title(st)
 check_active_session(st, "Ecco la tua dashboard")
 
 DB = Path(PATH, f"utente_{st.session_state.user}.db")
