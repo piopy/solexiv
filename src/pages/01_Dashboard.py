@@ -72,12 +72,12 @@ def mostra_pagina_resoconto_mensile():
     )
     st.write(
         "Entrate questo mese:",
-        f"<span style='color:green'>{e[0]}€</span>",
+        f"<span style='color:green'>{e}€</span>",
         unsafe_allow_html=True,
     )
     st.write(
         "Uscite questo mese:",
-        f"<span style='color:red'>{u[0]}€</span>",
+        f"<span style='color:red'>{u}€</span>",
         unsafe_allow_html=True,
     )
 
