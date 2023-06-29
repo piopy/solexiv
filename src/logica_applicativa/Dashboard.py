@@ -172,4 +172,4 @@ def entrate_uscite(DB, conto_corrente, mese_selezionato):
 
     conn.close()
 
-    return entr, uscite
+    return round(entr, 2), round(uscite, 2)
