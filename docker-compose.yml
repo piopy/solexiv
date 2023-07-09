@@ -22,4 +22,9 @@ services:
     ports:
       - 8181:8181
     restart: 'unless-stopped'
-    command: streamlit run Homepage.py --server.port 8181 --server.address 0.0.0.0 --browser.gatherUsageStats False
+    # command: streamlit run Homepage.py --server.port 8181 --server.address 0.0.0.0 --browser.gatherUsageStats False
+    networks:
+      - defaultNetwork
+
+networks:
+  defaultNetwork:
