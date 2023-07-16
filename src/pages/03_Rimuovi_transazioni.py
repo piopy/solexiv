@@ -1,13 +1,17 @@
 import streamlit as st
 from logica_applicativa.Rimuovi_transazioni import (
-    rimuovi_transazioni,
-    select_all_transazioni,
+    # rimuovi_transazioni,
+    rimuovi_transazioni_mongo,
+    # select_all_transazioni,
+    select_all_transazioni_mongo,
 )
 
 from utils.many_utils import (
     check_active_session,
     logo_and_page_title,
-    ottieni_conti_correnti,
+    # ottieni_conti_correnti,
+    ottieni_conti_correnti_mongo,
+    width_hack,
 )
 
 
@@ -19,7 +23,9 @@ def rm_transazioni():
     st.title("Rimozione Transazioni")
 
     try:
-        conti_correnti = ottieni_conti_correnti(st.session_state["user"])
+        conti_correnti = ottieni_conti_correnti_mongo(
+            st.session_state["user"], st.session_state["mongo_uri"]
+        )
     except:
         conti_correnti = ["Nessun conto corrente rilevato"]
         st.stop()
@@ -31,16 +37,17 @@ def rm_transazioni():
     if conto_corrente_selezionato == None:
         st.stop()
 
-    transazioni = select_all_transazioni(st, conto_corrente_selezionato)
+    transazioni = select_all_transazioni_mongo(st, conto_corrente_selezionato)
 
     transazioni_selezionate = st.multiselect(
-        "Seleziona le transazioni da rimuovere", transazioni
+        "Seleziona le transazioni da rimuovere",
+        transazioni,
     )
-
+    lista = transazioni_selezionate
     if st.button("Rimuovi Transazioni"):
-        if transazioni_selezionate:
-            rimuovi_transazioni(st, transazioni_selezionate, conto_corrente_selezionato)
-            st.success("Transazioni rimosse con successo!")
+        if lista:
+            if rimuovi_transazioni_mongo(st, lista, conto_corrente_selezionato):
+                st.success("Transazioni rimosse con successo!")
         else:
             st.error("Seleziona almeno una transazione da rimuovere")
 

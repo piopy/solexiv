@@ -1,7 +1,10 @@
+import io
 import os
 from pathlib import Path
 import sqlite3
-from utils.many_utils import PATH, db_isempty
+
+import pandas as pd
+from utils.many_utils import PATH, db_isempty, db_isempty_mongo, get_collection
 from pymongo import MongoClient
 
 
@@ -47,7 +50,7 @@ def backup_su_mongo(coll, transazioni):
     return a
 
 
-def get_all_data_mongo_collection(coll):
+def get_all_data_mongo_collection(coll):  # equivalente della select *
     return [t for t in coll.find()]
 
 
@@ -136,18 +139,18 @@ def ripristina_scadenze_da_mongo(st, coll):
     return scadenze
 
 
-def get_collection_transazioni(
-    st,
-    mongo_uri,
-    mongo_db="solexiv_db",
-):
-    mongo_collection = f"utente_{st.session_state['user']}"
+# def get_collection_transazioni(
+#     st,
+#     mongo_uri,
+#     mongo_db="solexiv_db",
+# ):
+#     mongo_collection = f"utente_{st.session_state['user']}"
 
-    client = MongoClient(mongo_uri)
-    db = client[mongo_db]
-    collection = db[mongo_collection]
+#     client = MongoClient(mongo_uri)
+#     db = client[mongo_db]
+#     collection = db[mongo_collection]
 
-    return collection
+#     return collection
 
 
 def get_collection_scadenze(
@@ -213,3 +216,107 @@ def get_scadenze(st):
         scadenze.append(scadenza)
     conn_sqlite.close()
     return scadenze
+
+
+############### Mongo
+
+
+def download_database_mongo(st):
+    collection = get_collection(
+        st.session_state["user"],
+        "utente",
+        st.session_state["mongo_uri"],
+        mongo_db="solexiv_db",
+    )
+
+    empty = db_isempty_mongo(st.session_state["user"], st.session_state["mongo_uri"])
+    download_file_name = f"utente_{st.session_state['user']}_TRANSAZIONI.solexiv"
+    try:
+        buffer = io.BytesIO()
+        if not empty:
+            documenti = list(collection.find())
+            df = pd.DataFrame(documenti)
+
+            csv_file = df.to_csv(buffer, sep=";", index=False, encoding="utf-8")
+
+        if st.download_button(
+            "Clicca qui per scaricare il database",
+            data=buffer,
+            file_name=download_file_name,
+            mime="application/json",
+            disabled=empty,
+        ):
+            st.success("Database scaricato")
+    except:
+        st.error("Qualcosa è andato storto")
+
+    return True
+
+
+def ripristina_da_file_mongo(st, file):  # .drop(columns=["_id", "id"])
+    collection = get_collection(
+        st.session_state["user"],
+        "utente",
+        st.session_state["mongo_uri"],
+        mongo_db="solexiv_db",
+    )
+    df = pd.read_csv(file, sep=";", encoding="utf-8")
+    st.warning("Cancello i record presenti su MongoDB")
+    collection.delete_many({})
+    documenti = df.drop(columns=["_id", "id"]).to_dict(orient="records")
+    if documenti:
+        st.warning("Carico i record su MongoDB")
+        collection.insert_many(documenti)
+
+    return True
+
+
+def download_database_scadenze_mongo(st):
+    collection = get_collection(
+        st.session_state["user"],
+        "scadenze",
+        st.session_state["mongo_uri"],
+        mongo_db="solexiv_db",
+    )
+
+    empty = db_isempty_mongo("scadenze", st.session_state["mongo_uri"])
+
+    download_file_name = f"utente_{st.session_state['user']}_SCADENZE.solexiv"
+    try:
+        buffer = io.BytesIO()
+        if not empty:
+            documenti = list(collection.find())
+            df = pd.DataFrame(documenti)
+
+            csv_file = df.to_csv(buffer, sep=";", index=False, encoding="utf-8")
+
+        if st.download_button(
+            "Clicca qui per scaricare il database",
+            data=buffer,
+            file_name=download_file_name,
+            mime="application/json",
+            disabled=empty,
+        ):
+            st.success("Database scaricato")
+    except:
+        st.error("Qualcosa è andato storto")
+
+    return True
+
+
+def ripristina_scadenze_da_file_mongo(st, file):  # .drop(columns=["_id", "id"])
+    collection = get_collection(
+        st.session_state["user"],
+        "scadenze",
+        st.session_state["mongo_uri"],
+        mongo_db="solexiv_db",
+    )
+    df = pd.read_csv(file, sep=";", encoding="utf-8")
+    st.warning("Cancello i record presenti su MongoDB")
+    collection.delete_many({})
+    documenti = df.drop(columns=["_id", "id"]).to_dict(orient="records")
+    if documenti:
+        st.warning("Carico i record su MongoDB")
+        collection.insert_many(documenti)
+
+    return True

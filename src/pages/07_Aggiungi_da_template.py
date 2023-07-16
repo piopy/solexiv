@@ -1,6 +1,6 @@
 from pathlib import Path
 import streamlit as st
-from logica_applicativa.Aggiungi_da_template import injection
+from logica_applicativa.Aggiungi_da_template import injection, injection_mongo
 
 from utils.many_utils import check_active_session, logo_and_page_title
 
@@ -27,7 +27,7 @@ def aggiungi_da_template():
     if template_file is not None:
         if st.button("Inserisci le transazioni"):
             try:
-                injection(st, template_file.getvalue())
+                injection_mongo(st, template_file.getvalue())
                 st.success("Transazioni aggiunte con successo")
             except:
                 st.error("Qualcosa è andato storto")

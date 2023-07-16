@@ -1,15 +1,23 @@
 from pathlib import Path
 import sqlite3
 import streamlit as st
+from logica_applicativa.Aggiungi_transazione import (
+    aggiungi_transazione,
+    aggiungi_transazione_mongo,
+)
 
 from utils.many_utils import (
     PATH,
     check_active_session,
     logo_and_page_title,
     ottieni_conti_correnti,
+    ottieni_conti_correnti_mongo,
 )
 from utils.vars import categorie
-from logica_applicativa.Creazioni_tabelle import crea_tabella_utente
+from logica_applicativa.Creazioni_tabelle import (
+    crea_tabella_utente,
+    crea_tabella_utente_mongo,
+)
 
 
 logo_and_page_title(st)
@@ -21,9 +29,13 @@ def mostra_pagina_aggiunta_entrate_uscite():
 
     col1, col2 = st.columns(2)
     with col1:
-        crea_tabella_utente(st.session_state["user"])
+        crea_tabella_utente_mongo(
+            st.session_state["user"], st.session_state["mongo_uri"]
+        )
 
-        conti_correnti = ottieni_conti_correnti(st.session_state["user"])
+        conti_correnti = ottieni_conti_correnti_mongo(
+            st.session_state["user"], st.session_state["mongo_uri"]
+        )
         conti_correnti.append("Altro")
         conto_corrente_selezionato = st.selectbox(
             "Seleziona il conto corrente", conti_correnti
@@ -47,30 +59,30 @@ def mostra_pagina_aggiunta_entrate_uscite():
         note = st.text_area("Inserire nota")
 
         if st.button("Aggiungi Transazione"):
+            if (
+                conto_corrente_selezionato == ""
+                or categoria == ""
+                or tipo_transazione == ""
+                or descrizione == ""
+            ):
+                st.error("Tutti i campi, ad eccezione delle note sono obbligatori")
+                st.stop()
             if conto_corrente_selezionato == "Altro":
                 conto_corrente = cc_rivisto
             else:
                 conto_corrente = conto_corrente_selezionato
 
-            conn = sqlite3.connect(Path(PATH, f"utente_{st.session_state['user']}.db"))
-            c = conn.cursor()
-            c.execute(
-                """INSERT INTO transazioni_utente (data, conto_corrente, tipo, descrizione, importo, categoria, note) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                (
-                    data_transazione,
-                    conto_corrente,
-                    tipo_transazione,
-                    descrizione,
-                    importo,
-                    categoria,
-                    note,
-                ),
-            )
-            conn.commit()
-            conn.close()
-
-            st.success("Transazione aggiunta con successo!")
+            if aggiungi_transazione_mongo(
+                st,
+                data_transazione,
+                conto_corrente,
+                tipo_transazione,
+                descrizione,
+                importo,
+                categoria,
+                note,
+            ):
+                st.success("Transazione aggiunta con successo!")
 
 
 ################

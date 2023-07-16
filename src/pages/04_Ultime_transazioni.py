@@ -1,12 +1,16 @@
 from datetime import date, datetime
 import pandas as pd
 import streamlit as st
-from logica_applicativa.Ultime_transazioni import ottieni_ultime_transazioni
+from logica_applicativa.Ultime_transazioni import (
+    ottieni_ultime_transazioni,
+    ottieni_ultime_transazioni_mongo,
+)
 
 from utils.many_utils import (
     check_active_session,
     logo_and_page_title,
     ottieni_conti_correnti,
+    ottieni_conti_correnti_mongo,
 )
 from utils.vars import categorie
 
@@ -16,7 +20,9 @@ check_active_session(st, "Ecco le tue ultime transazioni")
 
 def mostra_ultime_transazioni():
     try:
-        conti_correnti = ottieni_conti_correnti(st.session_state["user"])
+        conti_correnti = ottieni_conti_correnti_mongo(
+            st.session_state["user"], st.session_state["mongo_uri"]
+        )
     except:
         conti_correnti = ["Nessun conto corrente rilevato"]
     conto_corrente_selezionato = st.selectbox(
@@ -24,8 +30,11 @@ def mostra_ultime_transazioni():
     )
 
     n_transazioni = st.text_input("Transazioni visualizzate", value=20)
-    transazioni = ottieni_ultime_transazioni(
-        st, conto_corrente_selezionato, n_transazioni
+    transazioni = ottieni_ultime_transazioni_mongo(
+        st,
+        conto_corrente_selezionato,
+        st.session_state["mongo_uri"],
+        n_transazioni=n_transazioni,
     )
 
     df = pd.DataFrame(
@@ -59,11 +68,13 @@ def mostra_ultime_transazioni():
     st.table(
         df[
             df["categoria"].isin(selected)
-            & df["descrizione"].str.upper().str.contains(descrizione.upper())
+            & df["descrizione"].fillna("").str.upper().str.contains(descrizione.upper())
             & df["data"].ge(dates[0])
             & df["data"].le(dates[1])
             & df["tipo"].isin(tipo)
         ]
+        .fillna("")
+        .style.format(subset=["importo"], formatter="{:.2f}")
     )
 
 

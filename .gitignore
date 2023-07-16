@@ -161,3 +161,4 @@ TODO
 creds/**
 !creds/*.sample.*
 temp/**
+jupyters
