@@ -1,6 +1,7 @@
 from pathlib import Path
 import sqlite3
-
+import pandas as pd
+from io import BytesIO
 from utils.many_utils import PATH, get_collection
 
 
@@ -52,3 +53,9 @@ def ottieni_ultime_transazioni_mongo(st, conto_corrente, mongo_uri, n_transazion
     transazioni = list(result)
 
     return transazioni
+
+def download_excel(df, name) -> bytes:
+    buffer = BytesIO()
+    with pd.ExcelWriter(path=buffer, engine="xlsxwriter") as w:
+        df.to_excel(excel_writer=w, index=False, sheet_name=name)
+    return buffer.getvalue()

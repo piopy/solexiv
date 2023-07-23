@@ -2,6 +2,7 @@ from datetime import date, datetime
 import pandas as pd
 import streamlit as st
 from logica_applicativa.Ultime_transazioni import (
+    download_excel,
     ottieni_ultime_transazioni,
     ottieni_ultime_transazioni_mongo,
 )
@@ -65,7 +66,7 @@ def mostra_ultime_transazioni():
     dates = [datetime.strftime(d, "%Y-%m-%d") for d in datarange]
     if len(dates) != 2:
         dates.append(datetime.now().strftime("%Y-%m-%d"))
-    st.table(
+    out_df = (
         df[
             df["categoria"].isin(selected)
             & df["descrizione"].fillna("").str.upper().str.contains(descrizione.upper())
@@ -75,6 +76,18 @@ def mostra_ultime_transazioni():
         ]
         .fillna("")
         .style.format(subset=["importo"], formatter="{:.2f}")
+    )
+
+    st.table(out_df)
+
+    st.download_button(
+        label="Scarica tabella (EXCEL)",
+        data=download_excel(
+            df=out_df,
+            name=f"{conto_corrente_selezionato[0:9]}-{dates[0]}{dates[1]}",
+        ),
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        file_name=f"Resoconto_{conto_corrente_selezionato}_{dates[0]}_{dates[1]}.xlsx",
     )
 
 
