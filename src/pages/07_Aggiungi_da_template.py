@@ -2,7 +2,7 @@ from pathlib import Path
 import streamlit as st
 from logica_applicativa.Aggiungi_da_template import injection, injection_mongo
 
-from utils.many_utils import check_active_session, logo_and_page_title
+from utils.many_utils import check_active_session, logo_and_page_title, PATH
 
 
 logo_and_page_title(st)
@@ -12,7 +12,7 @@ check_active_session(st, "Qui puoi aggiungere transazioni a partire da un templa
 def aggiungi_da_template():
     st.markdown("### Template:")
     try:
-        with open(Path("..", "data", "Template.xlsx"), "rb") as file:
+        with open(Path(PATH, "Template.xlsx"), "rb") as file:
             data = file.read()
         if st.download_button(
             "Scarica il template", data=data, file_name="Template.xlsx"
