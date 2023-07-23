@@ -154,6 +154,7 @@ cython_debug/
 data/*
 !data/.gitkeep
 !data/*.ico
+!data/utenti.db
 !data/Template.xlsx
 *.lock
 jupyter/**
