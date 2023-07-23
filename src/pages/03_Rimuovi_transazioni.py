@@ -11,7 +11,6 @@ from utils.many_utils import (
     logo_and_page_title,
     # ottieni_conti_correnti,
     ottieni_conti_correnti_mongo,
-    width_hack,
 )
 
 
