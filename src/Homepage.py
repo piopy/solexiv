@@ -36,8 +36,6 @@ from streamlit_card import card
 
 logo_and_page_title(st)
 
-st.write(os.listdir("."))
-
 
 # Pagina di accesso e registrazione
 def login():
