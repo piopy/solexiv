@@ -6,7 +6,7 @@ from PIL import Image
 import os
 from pymongo import MongoClient
 
-PATH = "../data/"
+PATH = "./data/"
 
 
 def logo_and_page_title(st):
