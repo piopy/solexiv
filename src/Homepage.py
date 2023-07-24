@@ -168,9 +168,9 @@ def login():
                     st.experimental_rerun()
                 else:
                     st.error("Nome utente o password non validi.")
-            except:
+            except Exception as e:
                 st.error("Errore nel recupero dell'utente")
-                st.stop()
+                st.write(e)
 
     with st.expander("**REGISTRAZIONE**"):
         # st.title("Registrazione")
