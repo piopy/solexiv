@@ -161,6 +161,7 @@ def main_scadenze_v2(mongouri):
 #     main()
 def pagina_bella():
     mongouri = st.text_input("Mongo URI", value=st.session_state["mongo_uri"])
+    st.write("")
     with st.expander("Operazioni su Transazioni MongoDB", True):
         main_v2(mongouri)
     with st.expander("Operazioni su Scadenze MongoDB", True):

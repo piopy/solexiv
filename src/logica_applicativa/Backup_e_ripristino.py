@@ -229,7 +229,9 @@ def download_database_mongo(st):
         mongo_db="solexiv_db",
     )
 
-    empty = db_isempty_mongo(st.session_state["user"], st.session_state["mongo_uri"])
+    empty = db_isempty_mongo(
+        st.session_state["user"], "utente", st.session_state["mongo_uri"]
+    )
     download_file_name = f"utente_{st.session_state['user']}_TRANSAZIONI.solexiv"
     try:
         buffer = io.BytesIO()
@@ -279,7 +281,9 @@ def download_database_scadenze_mongo(st):
         mongo_db="solexiv_db",
     )
 
-    empty = db_isempty_mongo("scadenze", st.session_state["mongo_uri"])
+    empty = db_isempty_mongo(
+        st.session_state["user"], "scadenze", st.session_state["mongo_uri"]
+    )
 
     download_file_name = f"utente_{st.session_state['user']}_SCADENZE.solexiv"
     try:

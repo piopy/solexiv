@@ -150,10 +150,10 @@ def ottieni_conti_correnti_mongo(username, mongo_uri):
     return conti_correnti
 
 
-def db_isempty_mongo(user, mongo_uri):
+def db_isempty_mongo(user, tipo, mongo_uri):
     transazioni_col = get_collection(
         user,
-        "utente",
+        tipo,
         mongo_uri,
         mongo_db="solexiv_db",
     )
