@@ -33,7 +33,7 @@ def autenticazione(st, username, password, persistenza):
     c.execute("SELECT mongo_uri FROM utenti WHERE username=?", (username,))
     mongo_uri = c.fetchone()[0]
     # # # st.write(result, mongo_uri)  # debug only
-    st.stop()
+    # # # st.stop()
     conn.close()
     if result:
         hashed_password = result[0]
