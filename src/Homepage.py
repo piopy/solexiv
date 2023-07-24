@@ -162,11 +162,15 @@ def login():
         # Controllo dell'autenticazione
         if st.button("Accedi"):
             # Input del nome utente
-            if autenticazione(st, username, password, persistenza):
-                st.success("Accesso effettuato con successo.")
-                st.experimental_rerun()
-            else:
-                st.error("Nome utente o password non validi.")
+            try:
+                if autenticazione(st, username, password, persistenza):
+                    st.success("Accesso effettuato con successo.")
+                    st.experimental_rerun()
+                else:
+                    st.error("Nome utente o password non validi.")
+            except:
+                st.error("Errore nel recupero dell'utente")
+                st.stop()
 
     with st.expander("**REGISTRAZIONE**"):
         # st.title("Registrazione")
@@ -182,15 +186,23 @@ def login():
         if not mongo_uri.endswith("/?retryWrites=true&w=majority"):
             mongo_uri = mongo_uri + "/?retryWrites=true&w=majority"
         if st.button("Registra"):
-            esito = crea_utente(st, new_username, new_password, mongo_uri)
-            if esito:
-                st.success(
-                    "Registrazione effettuata con successo. Ora puoi effettuare l'accesso."
-                )
-                st.warning(
-                    "Attenzione! Su questo server gli utenti potrebbero cancellarsi in seguito a rilasci o a pulizia del dominio del server.\nCi dispiace per l'inconveniente."
-                )
-                st.balloons()
+            if (
+                new_username != ""
+                and new_password != ""
+                and mongo_uri != "mongodb+srv://<USER>:<Password>@.........mongodb.net"
+                and mongo_uri != ""
+            ):
+                esito = crea_utente(st, new_username, new_password, mongo_uri)
+                if esito:
+                    st.success(
+                        "Registrazione effettuata con successo. Ora puoi effettuare l'accesso."
+                    )
+                    st.warning(
+                        "Attenzione! Su questo server gli utenti potrebbero cancellarsi in seguito a rilasci o a pulizia del dominio del server.\nCi dispiace per l'inconveniente."
+                    )
+                    st.toast("Registrazione completata con successo")
+            else:
+                st.error("Verifica i campi inseriti e riprova")
 
 
 login()
