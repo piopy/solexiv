@@ -112,9 +112,9 @@ check_active_session(
 ######################### Mongo v2
 
 
-def main_v2():
+def main_v2(mongouri):
     col1, col2 = st.columns(2)
-    crea_tabella_utente_mongo(st.session_state["user"], st.session_state["mongo_uri"])
+    crea_tabella_utente_mongo(st.session_state["user"], mongouri)
 
     with col1:
         st.markdown("Download del Database")
@@ -132,9 +132,9 @@ def main_v2():
                 ripristina_da_file_mongo(st, backup_file)
 
 
-def main_scadenze_v2():
+def main_scadenze_v2(mongouri):
     col3, col4 = st.columns(2)
-    crea_tabella_utente_mongo(st.session_state["user"], st.session_state["mongo_uri"])
+    crea_tabella_utente_mongo(st.session_state["user"], mongouri)
 
     with col3:
         st.markdown("Download del Database")
@@ -154,11 +154,17 @@ def main_scadenze_v2():
 
 ########################
 
+
 # with st.expander("Operazioni su file"):
 #     main_()
 # with st.expander("Operazioni su MongoDB"):
 #     main()
-with st.expander("Operazioni su Transazioni MongoDB", True):
-    main_v2()
-with st.expander("Operazioni su Scadenze MongoDB", True):
-    main_scadenze_v2()
+def pagina_bella():
+    mongouri = st.text_input("Mongo URI", value=st.session_state["mongo_uri"])
+    with st.expander("Operazioni su Transazioni MongoDB", True):
+        main_v2(mongouri)
+    with st.expander("Operazioni su Scadenze MongoDB", True):
+        main_scadenze_v2(mongouri)
+
+
+pagina_bella()
