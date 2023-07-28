@@ -23,7 +23,7 @@ def download_database(st):
                 file_name=download_file_name,
                 disabled=empty,
             ):
-                st.success("Database scaricato")
+                st.toast("Database scaricato")
         else:
             st.warning("Database non trovato")
     except:
@@ -34,7 +34,7 @@ def ripristina_da_file(st, backup_file):
     try:
         with open(Path(PATH, f"utente_{st.session_state['user']}.db"), "wb") as file:
             file.write(backup_file.getvalue())
-            st.success("Database ripristinato con successo!")
+            st.toast("Database ripristinato con successo!")
     except:
         st.error("Qualcosa è andato storto")
 
@@ -248,7 +248,7 @@ def download_database_mongo(st):
             mime="application/json",
             disabled=empty,
         ):
-            st.success("Database scaricato")
+            st.toast("Database scaricato")
     except:
         st.error("Qualcosa è andato storto")
 
@@ -263,11 +263,11 @@ def ripristina_da_file_mongo(st, file):  # .drop(columns=["_id", "id"])
         mongo_db="solexiv_db",
     )
     df = pd.read_csv(file, sep=";", encoding="utf-8")
-    st.warning("Cancello i record presenti su MongoDB")
+    st.toast("Cancello i record presenti su MongoDB")
     collection.delete_many({})
     documenti = df.drop(columns=["_id", "id"]).to_dict(orient="records")
     if documenti:
-        st.warning("Carico i record su MongoDB")
+        st.toast("Carico i record su MongoDB")
         collection.insert_many(documenti)
 
     return True
@@ -301,7 +301,7 @@ def download_database_scadenze_mongo(st):
             mime="application/json",
             disabled=empty,
         ):
-            st.success("Database scaricato")
+            st.toast("Database scaricato")
     except:
         st.error("Qualcosa è andato storto")
 
@@ -316,11 +316,11 @@ def ripristina_scadenze_da_file_mongo(st, file):  # .drop(columns=["_id", "id"])
         mongo_db="solexiv_db",
     )
     df = pd.read_csv(file, sep=";", encoding="utf-8")
-    st.warning("Cancello i record presenti su MongoDB")
+    st.toast("Cancello i record presenti su MongoDB")
     collection.delete_many({})
     documenti = df.drop(columns=["_id", "id"]).to_dict(orient="records")
     if documenti:
-        st.warning("Carico i record su MongoDB")
+        st.toast("Carico i record su MongoDB")
         collection.insert_many(documenti)
 
     return True

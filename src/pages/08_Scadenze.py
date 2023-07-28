@@ -89,7 +89,7 @@ def mostra_pagina_scadenze():
             if len(completate) > 0:
                 for scadenza_id in completate:
                     aggiorna_stato_scadenza_mongo(st, scadenza_id[0])
-                st.success("Scadenze segnate come completate.")
+                st.toast("Scadenze segnate come completate.")
                 sleep(1)
                 st.experimental_rerun()
 
@@ -102,7 +102,7 @@ def mostra_pagina_scadenze():
             if len(completate) > 0:
                 for scadenza_id in completate:
                     elimina_scadenza_mongo(st, scadenza_id[0])
-                st.success("Scadenze eliminate.")
+                st.toast("Scadenze eliminate.")
                 sleep(1)
                 st.experimental_rerun()
 

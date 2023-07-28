@@ -54,7 +54,7 @@ def injection_mongo(st, file):
 
     for _, row in df.iterrows():
         transazione = {
-            "data": str(row["Data"]),
+            "data": row["Data"].strftime("%Y-%m-%d"),
             "descrizione": row["Descrizione"],
             "tipo": row["Tipo"],
             "importo": row["Importo"],

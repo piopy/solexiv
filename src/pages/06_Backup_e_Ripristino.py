@@ -130,6 +130,7 @@ def main_v2(mongouri):
             st.warning("Attenzione! Questo sovrascriverà l'attuale database locale!")
             if st.button("Ripristina"):
                 ripristina_da_file_mongo(st, backup_file)
+                st.toast("Completato")
 
 
 def main_scadenze_v2(mongouri):

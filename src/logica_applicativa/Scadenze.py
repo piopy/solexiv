@@ -191,7 +191,7 @@ def inserisci_scadenza_mongo(
 
     res = scadenze_col.insert_one(scadenza)
 
-    st.success("Scadenza inserita correttamente.")
+    st.toast("Scadenza inserita correttamente.")
     return True
 
 
@@ -211,7 +211,7 @@ def aggiorna_stato_scadenza_mongo(st, id_scadenza):
 
         scadenze_col.update_one({"_id": id_scadenza}, {"$set": scadenza})
 
-        st.success("Stato della scadenza aggiornato correttamente.")
+        st.toast("Stato della scadenza aggiornato correttamente.")
     else:
         st.error("Scadenza non trovata.")
 
@@ -228,6 +228,6 @@ def elimina_scadenza_mongo(st, id_scadenza):
     result = scadenze_col.delete_one({"_id": id_scadenza})
 
     if result.deleted_count > 0:
-        st.success("Scadenza eliminata correttamente.")
+        st.toast("Scadenza eliminata correttamente.")
     else:
         st.error("Scadenza non trovata.")

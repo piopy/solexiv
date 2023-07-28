@@ -46,7 +46,7 @@ def rm_transazioni():
     if st.button("Rimuovi Transazioni"):
         if lista:
             if rimuovi_transazioni_mongo(st, lista, conto_corrente_selezionato):
-                st.success("Transazioni rimosse con successo!")
+                st.toast("Transazioni rimosse con successo!")
         else:
             st.error("Seleziona almeno una transazione da rimuovere")
 

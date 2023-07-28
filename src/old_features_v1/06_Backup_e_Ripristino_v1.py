@@ -78,13 +78,13 @@ def main():
             transazioni = get_transazioni(st)
             a = backup_su_mongo(coll, transazioni)
 
-            st.success(f"Effettuato il backup di {len(a)} transazioni")
+            st.toast(f"Effettuato il backup di {len(a)} transazioni")
 
             # backup scadenze
             coll_scad = get_collection_scadenze(st, uri)
             scadenze = get_scadenze(st)
             b = backup_su_mongo(coll_scad, scadenze)
-            st.success(f"Effettuato il backup di {len(b)} scadenze")
+            st.toast(f"Effettuato il backup di {len(b)} scadenze")
 
     with col4:
         st.warning("Attenzione! Questo sovrascriverà l'attuale database locale!")
@@ -92,12 +92,12 @@ def main():
             # ripristino transazioni
             coll = get_collection_transazioni(st, uri)
             transazioni = ripristina_transazioni_da_mongo(st, coll)
-            st.success(f"Effettuato il ripristino di {len(transazioni)} transazioni")
+            st.toast(f"Effettuato il ripristino di {len(transazioni)} transazioni")
 
             # ripristino scadenze
             coll_scad = get_collection_scadenze(st, uri)
             scadenze = ripristina_scadenze_da_mongo(st, coll_scad)
-            st.success(f"Effettuato il ripristino di {len(scadenze)} scadenze")
+            st.toast(f"Effettuato il ripristino di {len(scadenze)} scadenze")
 
 
 #########################

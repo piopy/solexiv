@@ -17,7 +17,7 @@ def aggiungi_da_template():
         if st.download_button(
             "Scarica il template", data=data, file_name="Template.xlsx"
         ):
-            st.success("Template scaricato")
+            st.toast("Template scaricato")
     except:
         st.error("Template non disponibile")
     st.write("Una volta compilato, carica qui il template")
@@ -28,7 +28,7 @@ def aggiungi_da_template():
         if st.button("Inserisci le transazioni"):
             try:
                 injection_mongo(st, template_file.getvalue())
-                st.success("Transazioni aggiunte con successo")
+                st.toast("Transazioni aggiunte con successo")
             except:
                 st.error("Qualcosa è andato storto")
 

@@ -1,6 +1,6 @@
 from pathlib import Path
 import sqlite3
-
+import pymongo
 from utils.many_utils import PATH, get_collection
 
 
@@ -61,6 +61,8 @@ def select_all_transazioni_mongo(st, conto_corrente_selezionato):
         mongo_db="solexiv_db",
     )
 
-    transazioni = transazioni_col.find({"conto_corrente": conto_corrente_selezionato})
+    transazioni = transazioni_col.find(
+        {"conto_corrente": conto_corrente_selezionato}
+    ).sort("data", pymongo.DESCENDING)
 
     return transazioni

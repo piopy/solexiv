@@ -54,7 +54,7 @@ def login():
     if st.session_state["user"]:
         uri = st.session_state["mongo_uri"]
         st.title(f"Ciao, {st.session_state.user.title()}!")
-        st.success("<- Ora puoi navigare tra le pagine")
+        st.toast("<- Ora puoi navigare tra le pagine")
         crea_tabella_utente_mongo(st.session_state["user"], uri)
         crea_tabella_scadenze_mongo(st, uri)
 
@@ -134,7 +134,7 @@ def login():
                     "https://media.giphy.com/media/o0eOCNkn7cSD6/giphy.gif",
                     use_column_width=False,
                 )
-                st.success(
+                st.toast(
                     "Hai eliminato l'account. Verrai rispedito alla pagina di login a breve."
                 )
                 sleep(4)
@@ -143,7 +143,7 @@ def login():
         if st.button("Logout"):
             st.session_state["user"] = None
             st.session_state["password"] = None
-            st.success("Hai effettuato il logout")
+            st.toast("Hai effettuato il logout")
             rimuovi_sessione_attiva(st)
             st.experimental_rerun()
         st.stop()
@@ -164,7 +164,7 @@ def login():
             # Input del nome utente
             try:
                 if autenticazione(st, username, password, persistenza):
-                    st.success("Accesso effettuato con successo.")
+                    st.toast("Accesso effettuato con successo.")
                     st.experimental_rerun()
                 else:
                     st.error("Nome utente o password non validi.")

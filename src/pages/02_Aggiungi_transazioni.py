@@ -82,7 +82,7 @@ def mostra_pagina_aggiunta_entrate_uscite():
                 categoria,
                 note,
             ):
-                st.success("Transazione aggiunta con successo!")
+                st.toast("Transazione aggiunta con successo!")
 
 
 ################
