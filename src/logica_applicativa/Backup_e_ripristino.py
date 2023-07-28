@@ -221,17 +221,15 @@ def get_scadenze(st):
 ############### Mongo
 
 
-def download_database_mongo(st):
+def download_database_mongo(st, mongouri):
     collection = get_collection(
         st.session_state["user"],
         "utente",
-        st.session_state["mongo_uri"],
+        mongouri,
         mongo_db="solexiv_db",
     )
 
-    empty = db_isempty_mongo(
-        st.session_state["user"], "utente", st.session_state["mongo_uri"]
-    )
+    empty = db_isempty_mongo(st.session_state["user"], "utente", mongouri)
     download_file_name = f"utente_{st.session_state['user']}_TRANSAZIONI.solexiv"
     try:
         buffer = io.BytesIO()
@@ -255,11 +253,11 @@ def download_database_mongo(st):
     return True
 
 
-def ripristina_da_file_mongo(st, file):  # .drop(columns=["_id", "id"])
+def ripristina_da_file_mongo(st, file, mongouri):  # .drop(columns=["_id", "id"])
     collection = get_collection(
         st.session_state["user"],
         "utente",
-        st.session_state["mongo_uri"],
+        mongouri,
         mongo_db="solexiv_db",
     )
     df = pd.read_csv(file, sep=";", encoding="utf-8")
@@ -273,17 +271,15 @@ def ripristina_da_file_mongo(st, file):  # .drop(columns=["_id", "id"])
     return True
 
 
-def download_database_scadenze_mongo(st):
+def download_database_scadenze_mongo(st, mongouri):
     collection = get_collection(
         st.session_state["user"],
         "scadenze",
-        st.session_state["mongo_uri"],
+        mongouri,
         mongo_db="solexiv_db",
     )
 
-    empty = db_isempty_mongo(
-        st.session_state["user"], "scadenze", st.session_state["mongo_uri"]
-    )
+    empty = db_isempty_mongo(st.session_state["user"], "scadenze", mongouri)
 
     download_file_name = f"utente_{st.session_state['user']}_SCADENZE.solexiv"
     try:
@@ -308,11 +304,13 @@ def download_database_scadenze_mongo(st):
     return True
 
 
-def ripristina_scadenze_da_file_mongo(st, file):  # .drop(columns=["_id", "id"])
+def ripristina_scadenze_da_file_mongo(
+    st, file, mongouri
+):  # .drop(columns=["_id", "id"])
     collection = get_collection(
         st.session_state["user"],
         "scadenze",
-        st.session_state["mongo_uri"],
+        mongouri,
         mongo_db="solexiv_db",
     )
     df = pd.read_csv(file, sep=";", encoding="utf-8")

@@ -26,6 +26,7 @@ from utils.many_utils import (
 # import os
 from logica_applicativa.Creazioni_tabelle import (
     # crea_tabella_utente,
+    crea_tabella_scadenze_mongo,
     crea_tabella_utente_mongo,
 )
 
@@ -118,7 +119,7 @@ def main_v2(mongouri):
 
     with col1:
         st.markdown("Download del Database")
-        download_database_mongo(st)
+        download_database_mongo(st, mongouri)
     with col2:
         st.markdown("Ripristino del Database")
         backup_file = st.file_uploader(
@@ -129,17 +130,17 @@ def main_v2(mongouri):
         if backup_file is not None:
             st.warning("Attenzione! Questo sovrascriverà l'attuale database locale!")
             if st.button("Ripristina"):
-                ripristina_da_file_mongo(st, backup_file)
+                ripristina_da_file_mongo(st, backup_file, mongouri)
                 st.toast("Completato")
 
 
 def main_scadenze_v2(mongouri):
     col3, col4 = st.columns(2)
-    crea_tabella_utente_mongo(st.session_state["user"], mongouri)
+    crea_tabella_scadenze_mongo(st.session_state["user"], mongouri)
 
     with col3:
         st.markdown("Download del Database")
-        download_database_scadenze_mongo(st)
+        download_database_scadenze_mongo(st, mongouri)
     with col4:
         st.markdown("Ripristino del Database")
         backup_file_s = st.file_uploader(
@@ -150,7 +151,7 @@ def main_scadenze_v2(mongouri):
         if backup_file_s is not None:
             st.warning("Attenzione! Questo sovrascriverà l'attuale database locale!")
             if st.button("Ripristina"):
-                ripristina_scadenze_da_file_mongo(st, backup_file_s)
+                ripristina_scadenze_da_file_mongo(st, backup_file_s, mongouri)
 
 
 ########################
