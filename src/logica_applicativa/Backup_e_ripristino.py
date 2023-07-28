@@ -265,7 +265,7 @@ def ripristina_da_file_mongo(st, file):  # .drop(columns=["_id", "id"])
     df = pd.read_csv(file, sep=";", encoding="utf-8")
     st.toast("Cancello i record presenti su MongoDB")
     collection.delete_many({})
-    documenti = df.drop(columns=["_id", "id"]).to_dict(orient="records")
+    documenti = df.drop(columns=["_id"]).to_dict(orient="records")
     if documenti:
         st.toast("Carico i record su MongoDB")
         collection.insert_many(documenti)
