@@ -136,7 +136,7 @@ def main_v2(mongouri):
 
 def main_scadenze_v2(mongouri):
     col3, col4 = st.columns(2)
-    crea_tabella_scadenze_mongo(st.session_state["user"], mongouri)
+    crea_tabella_scadenze_mongo(st, mongouri)
 
     with col3:
         st.markdown("Download del Database")
