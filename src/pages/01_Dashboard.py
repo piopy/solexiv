@@ -82,17 +82,39 @@ def mostra_pagina_resoconto_mensile():
         conto_corrente_selezionato,
         elenco_mesi.index(mese_selezionato) + 1,
     )
+    storico = andamento_patrimonio_mongo(
+        st.session_state["user"],
+        conto_corrente_selezionato,
+        st.session_state["mongo_uri"],
+    )
+
     st.write(
-        "Entrate questo mese:",
+        "### **Saldo**:",
+        f'{storico.tail(1)["patrimonio"].values[0].round(2)}€',
+        unsafe_allow_html=True,
+    )
+    st.markdown(" ")
+
+    st.write(
+        "**Entrate questo mese:**",
         f"<span style='color:green'>{e}€</span>",
         unsafe_allow_html=True,
     )
     st.write(
-        "Uscite questo mese:",
+        "**Uscite questo mese:**",
         f"<span style='color:red'>{u}€</span>",
         unsafe_allow_html=True,
     )
-
+    # Saldo mese
+    if float(e) - float(u) < 0:
+        col_or = "red"
+    if float(e) - float(u) >= 0:
+        col_or = "green"
+    st.write(
+        "**Differenza:**",
+        f"<span style='color:{col_or}'>{round(float(e)-float(u),2)}€</span>",
+        unsafe_allow_html=True,
+    )
     # SPESE PER CATEGORIA
     scelta_dett = st.checkbox("Modalità dettagliata", value=False)
     if not scelta_dett:
@@ -188,11 +210,11 @@ def mostra_pagina_resoconto_mensile():
 
     # Andamento patrimonio
 
-    storico = andamento_patrimonio_mongo(
-        st.session_state["user"],
-        conto_corrente_selezionato,
-        st.session_state["mongo_uri"],
-    )
+    # storico = andamento_patrimonio_mongo(
+    #     st.session_state["user"],
+    #     conto_corrente_selezionato,
+    #     st.session_state["mongo_uri"],
+    # )
     sto = storico[
         storico["data"].gt(
             risali_sei_mesi_prima(elenco_mesi.index(mese_selezionato) + 1)
