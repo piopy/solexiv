@@ -41,7 +41,7 @@ def rimuovi_transazioni_mongo(st, transazioni_selezionate, conto_corrente_selezi
         st.session_state["mongo_uri"],
         mongo_db="solexiv_db",
     )
-    st.write(transazioni_selezionate)
+
     for id_transazione in transazioni_selezionate:
         transazioni_col.delete_one(
             {
@@ -49,7 +49,8 @@ def rimuovi_transazioni_mongo(st, transazioni_selezionate, conto_corrente_selezi
                 "conto_corrente": conto_corrente_selezionato,
             }
         )
-
+    st.write("Hai rimosso con successo queste transazioni:")
+    st.write(transazioni_selezionate)
     return True
 
 

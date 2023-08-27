@@ -49,10 +49,14 @@ def ottieni_ultime_transazioni_mongo(st, conto_corrente, mongo_uri, n_transazion
         },
     ]
 
+    if n_transazioni == "0":
+        pipeline.remove({"$limit": int(n_transazioni)})
+
     result = transazioni_col.aggregate(pipeline)
     transazioni = list(result)
 
     return transazioni
+
 
 def download_excel(df, name) -> bytes:
     buffer = BytesIO()

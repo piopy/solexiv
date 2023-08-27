@@ -292,19 +292,18 @@ def entrate_uscite_mongo(username, mongo_uri, conto_corrente, mese_selezionato):
     entr = list(result_entrate)
 
     if not uscite:
-        uscite = [0]
+        uscite = 0  # [0]
     else:
         uscite = uscite[0]["total"]
+        if float(uscite) > 0:
+            uscite = str(float(round(uscite, 2)))
 
     if not entr:
-        entr = [0]
+        entr = 0  # [0]
     else:
         entr = entr[0]["total"]
-
-    if float(entr) > 0:
-        entr = str(float(round(entr, 2)))
-    if float(uscite) > 0:
-        uscite = str(float(round(uscite, 2)))
+        if float(entr) > 0:
+            entr = str(float(round(entr, 2)))
 
     return entr, uscite
 

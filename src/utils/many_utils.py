@@ -32,6 +32,11 @@ def logo_and_page_title(st):
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 
+def disable_form_border(st):
+    css = r""" <style> [data-testid="stForm"] {border: 0px} .css-15zrgzn {display: none} </style> """
+    st.markdown(css, unsafe_allow_html=True)
+
+
 def check_active_session(st, title):
     if os.path.exists(Path(PATH, "_active_session")):
         with open(Path(PATH, "_active_session"), "r") as f:

@@ -193,13 +193,14 @@ def mostra_pagina_resoconto_mensile():
         showlegend=False,
         template="simple_white",
         hovermode="closest",
-        hoverlabel=dict(bgcolor="white"),
+        hoverlabel=dict(bgcolor="white", font=dict(color="black")),
     )
     fig.update_traces(
         hovertemplate="<br>".join(
             [
                 "Tipologia: %{x}",
                 "Quota spesa: %{y}€",
+                "<extra></extra>",
             ]
         ),
         marker_showscale=False,
@@ -235,13 +236,14 @@ def mostra_pagina_resoconto_mensile():
         showlegend=False,
         template="simple_white",
         hovermode="closest",
-        hoverlabel=dict(bgcolor="white"),
+        hoverlabel=dict(bgcolor="white", font=dict(color="black")),
     )
     fig.update_traces(
         hovertemplate="<br>".join(
             [
                 "Mese: %{x}",
                 "Patrimonio: %{y}€",
+                "<extra></extra>",
             ]
         ),
         marker_showscale=False,
