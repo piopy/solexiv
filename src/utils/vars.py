@@ -10,6 +10,7 @@ categorie = [
     "Uscite Serali/Svago",
     "Trasporto",
     "Salute",
+    "Prelievo",
     "Ricarica prepagata",
     "Regalo",
     "Altro",

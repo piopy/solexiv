@@ -4,8 +4,9 @@ from pathlib import Path
 from datetime import datetime
 from PIL import Image
 import os
+from pymongo import MongoClient
 
-PATH = "../data/"
+PATH = "./data/"
 
 
 def logo_and_page_title(st):
@@ -31,6 +32,11 @@ def logo_and_page_title(st):
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 
+def disable_form_border(st):
+    css = r""" <style> [data-testid="stForm"] {border: 0px} .css-15zrgzn {display: none} </style> """
+    st.markdown(css, unsafe_allow_html=True)
+
+
 def check_active_session(st, title):
     if os.path.exists(Path(PATH, "_active_session")):
         with open(Path(PATH, "_active_session"), "r") as f:
@@ -38,6 +44,7 @@ def check_active_session(st, title):
             st.session_state["user"] = dizi["username"]
             st.session_state["password"] = dizi["hash_pw"]
             st.session_state["encrypted"] = dizi["encrypted"]
+            st.session_state["mongo_uri"] = dizi["mongo_uri"]
 
     if st.session_state.user:
         if st.session_state.encrypted:
@@ -97,3 +104,63 @@ def risali_sei_mesi_prima(mese):
     mese_sei_mesi_prima_str = f"{anno_sei_mesi_prima:04d}-{mese_sei_mesi_prima:02d}"
 
     return mese_sei_mesi_prima_str
+
+
+######################### Mongo
+
+
+def collection_exists(
+    username,
+    tabella,
+    mongo_uri,
+    mongo_db="solexiv_db",
+):
+    mongo_collection = f"{tabella}_{username}"
+
+    client = MongoClient(mongo_uri)
+    db = client[mongo_db]
+    return mongo_collection in db.list_collection_names()
+
+
+def get_collection(
+    username,
+    tabella,
+    mongo_uri,
+    mongo_db="solexiv_db",
+):
+    mongo_collection = f"{tabella}_{username}"
+
+    client = MongoClient(mongo_uri)
+    db = client[mongo_db]
+    collection = db[mongo_collection]
+
+    return collection
+
+
+def ottieni_conti_correnti_mongo(username, mongo_uri):
+    transazioni_col = get_collection(
+        username,
+        "utente",
+        mongo_uri,
+        mongo_db="solexiv_db",
+    )
+
+    pipeline = [
+        {"$group": {"_id": "$conto_corrente"}},
+        {"$project": {"conto_corrente": "$_id", "_id": 0}},
+    ]
+    result = transazioni_col.aggregate(pipeline)
+
+    conti_correnti = [row["conto_corrente"] for row in result]
+    return conti_correnti
+
+
+def db_isempty_mongo(user, tipo, mongo_uri):
+    transazioni_col = get_collection(
+        user,
+        tipo,
+        mongo_uri,
+        mongo_db="solexiv_db",
+    )
+    count = transazioni_col.count_documents({})
+    return count == 0

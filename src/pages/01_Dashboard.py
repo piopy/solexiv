@@ -1,23 +1,32 @@
 import streamlit as st
 from pathlib import Path
 from datetime import datetime
-from logica_applicativa.Creazioni_tabelle import crea_tabella_utente
+from logica_applicativa.Creazioni_tabelle import (
+    # crea_tabella_utente,
+    crea_tabella_utente_mongo,
+)
 from logica_applicativa.Dashboard import (
-    andamento_patrimonio,
-    entrate_uscite,
-    ottieni_spese_per_mese,
-    ottieni_spese_per_mese_descr,
-    ottieni_spese_ultimi_12_mesi,
+    # andamento_patrimonio,
+    andamento_patrimonio_mongo,
+    # entrate_uscite,
+    entrate_uscite_mongo,
+    # ottieni_spese_per_mese,
+    # ottieni_spese_per_mese_descr,
+    ottieni_spese_per_mese_descr_mongo,
+    ottieni_spese_per_mese_mongo,
+    # ottieni_spese_ultimi_12_mesi,
+    ottieni_spese_ultimi_12_mesi_mongo,
 )
 from utils.many_utils import (
     PATH,
     check_active_session,
     logo_and_page_title,
+    # ottieni_conti_correnti,
+    ottieni_conti_correnti_mongo,
     risali_sei_mesi_prima,
 )
 import plotly.express as px
 import pandas as pd
-from utils.many_utils import ottieni_conti_correnti
 
 
 logo_and_page_title(st)
@@ -30,7 +39,7 @@ DB = Path(PATH, f"utente_{st.session_state.user}.db")
 def mostra_pagina_resoconto_mensile():
     st.title("Resoconto Mensile")
 
-    crea_tabella_utente(st.session_state["user"])
+    crea_tabella_utente_mongo(st.session_state["user"], st.session_state["mongo_uri"])
 
     mese_corrente = datetime.now().month
     elenco_mesi = [
@@ -54,7 +63,9 @@ def mostra_pagina_resoconto_mensile():
 
     # Ottieni i conti correnti distinti
     try:
-        conti_correnti = ottieni_conti_correnti(st.session_state["user"])
+        conti_correnti = ottieni_conti_correnti_mongo(
+            st.session_state["user"], st.session_state["mongo_uri"]
+        )
     except:
         conti_correnti = ["Nessun conto corrente rilevato"]
         st.stop()
@@ -65,27 +76,51 @@ def mostra_pagina_resoconto_mensile():
 
     if conto_corrente_selezionato == None:
         st.stop()
-    e, u = entrate_uscite(
-        DB,
+    e, u = entrate_uscite_mongo(
+        st.session_state["user"],  # DB,
+        st.session_state["mongo_uri"],  # DB,
         conto_corrente_selezionato,
         elenco_mesi.index(mese_selezionato) + 1,
     )
+    storico = andamento_patrimonio_mongo(
+        st.session_state["user"],
+        conto_corrente_selezionato,
+        st.session_state["mongo_uri"],
+    )
+
     st.write(
-        "Entrate questo mese:",
+        "### **Saldo**:",
+        f'{storico.tail(1)["patrimonio"].values[0].round(2)}€',
+        unsafe_allow_html=True,
+    )
+    st.markdown(" ")
+
+    st.write(
+        "**Entrate questo mese:**",
         f"<span style='color:green'>{e}€</span>",
         unsafe_allow_html=True,
     )
     st.write(
-        "Uscite questo mese:",
+        "**Uscite questo mese:**",
         f"<span style='color:red'>{u}€</span>",
         unsafe_allow_html=True,
     )
-
+    # Saldo mese
+    if float(e) - float(u) < 0:
+        col_or = "red"
+    if float(e) - float(u) >= 0:
+        col_or = "green"
+    st.write(
+        "**Differenza:**",
+        f"<span style='color:{col_or}'>{round(float(e)-float(u),2)}€</span>",
+        unsafe_allow_html=True,
+    )
     # SPESE PER CATEGORIA
     scelta_dett = st.checkbox("Modalità dettagliata", value=False)
     if not scelta_dett:
-        tupla_mese = ottieni_spese_per_mese(
-            DB,
+        tupla_mese = ottieni_spese_per_mese_mongo(
+            st.session_state["user"],  # DB,
+            st.session_state["mongo_uri"],  # DB,
             conto_corrente_selezionato,
             elenco_mesi.index(mese_selezionato) + 1,
         )
@@ -103,8 +138,9 @@ def mostra_pagina_resoconto_mensile():
 
         st.plotly_chart(fig, use_container_width=True)
     else:
-        tupla_mese = ottieni_spese_per_mese_descr(
-            DB,
+        tupla_mese = ottieni_spese_per_mese_descr_mongo(
+            st.session_state["user"],  # DB,
+            st.session_state["mongo_uri"],  # DB,
             conto_corrente_selezionato,
             elenco_mesi.index(mese_selezionato) + 1,
         )
@@ -140,7 +176,11 @@ def mostra_pagina_resoconto_mensile():
         st.plotly_chart(fig, use_container_width=True)
 
     # Ottieni i dati delle spese negli ultimi 12 mesi
-    tupla_anno = ottieni_spese_ultimi_12_mesi(DB, conto_corrente_selezionato)
+    tupla_anno = ottieni_spese_ultimi_12_mesi_mongo(
+        st.session_state["user"],  # DB,
+        st.session_state["mongo_uri"],  # DB,
+        conto_corrente_selezionato,
+    )
     df_anno = pd.DataFrame(tupla_anno, index=["Data", "Tipologia", "Importo"]).T
 
     # Grafico a barre delle spese per categoria
@@ -153,13 +193,14 @@ def mostra_pagina_resoconto_mensile():
         showlegend=False,
         template="simple_white",
         hovermode="closest",
-        hoverlabel=dict(bgcolor="white"),
+        hoverlabel=dict(bgcolor="white", font=dict(color="black")),
     )
     fig.update_traces(
         hovertemplate="<br>".join(
             [
                 "Tipologia: %{x}",
                 "Quota spesa: %{y}€",
+                "<extra></extra>",
             ]
         ),
         marker_showscale=False,
@@ -170,7 +211,11 @@ def mostra_pagina_resoconto_mensile():
 
     # Andamento patrimonio
 
-    storico = andamento_patrimonio(DB, conto_corrente_selezionato)
+    # storico = andamento_patrimonio_mongo(
+    #     st.session_state["user"],
+    #     conto_corrente_selezionato,
+    #     st.session_state["mongo_uri"],
+    # )
     sto = storico[
         storico["data"].gt(
             risali_sei_mesi_prima(elenco_mesi.index(mese_selezionato) + 1)
@@ -191,13 +236,14 @@ def mostra_pagina_resoconto_mensile():
         showlegend=False,
         template="simple_white",
         hovermode="closest",
-        hoverlabel=dict(bgcolor="white"),
+        hoverlabel=dict(bgcolor="white", font=dict(color="black")),
     )
     fig.update_traces(
         hovertemplate="<br>".join(
             [
                 "Mese: %{x}",
                 "Patrimonio: %{y}€",
+                "<extra></extra>",
             ]
         ),
         marker_showscale=False,

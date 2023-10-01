@@ -10,6 +10,7 @@ def recupera_sessione_attiva(st):
         st.session_state["user"] = dizi["username"]
         st.session_state["password"] = dizi["hash_pw"]
         st.session_state["encrypted"] = dizi["encrypted"]
+        st.session_state["mongo_uri"] = dizi["mongo_uri"]
 
 
 def salva_sessione_attiva(st):
@@ -18,6 +19,7 @@ def salva_sessione_attiva(st):
             "username": st.session_state["user"],
             "hash_pw": st.session_state["password"],
             "encrypted": st.session_state["encrypted"],
+            "mongo_uri": st.session_state["mongo_uri"],
         }
         f.write(json.dumps(dizi))
 
