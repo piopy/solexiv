@@ -1,0 +1,4 @@
+data/*.db
+data/_active_session
+src/.venv
+src/*.lock

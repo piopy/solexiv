@@ -7,11 +7,11 @@
             "request": "launch",
             "module": "streamlit",
             "args": [
-            "run",
-            "${workspaceFolder}/src/Homepage.py"
+                "run",
+                "${workspaceFolder}/src/Homepage.py"
             ],
             "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}/src"
+            "cwd": "${workspaceFolder}" ///src
         }
     ],
     "compounds": []

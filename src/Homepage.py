@@ -1,20 +1,31 @@
+import json
 import os
 from time import sleep
 
 import streamlit as st
 from pathlib import Path
 from logica_applicativa.Creazioni_tabelle import (
-    crea_tabella_scadenze,
-    crea_tabella_utente,
+    # crea_tabella_scadenze,
+    crea_tabella_scadenze_mongo,
+    # crea_tabella_utente,
+    crea_tabella_utente_mongo,
     crea_tabella_utenti,
 )
-from logica_applicativa.Dashboard import andamento_patrimonio
+from logica_applicativa.Dashboard import (
+    # andamento_patrimonio,
+    andamento_patrimonio_mongo,
+)
 from logica_applicativa.Mainpage import autenticazione, crea_utente
-from logica_applicativa.Scadenze import genera_body_scadenza, get_scadenze
+from logica_applicativa.Scadenze import (
+    genera_body_scadenza,
+    # get_scadenze,
+    get_scadenze_mongo,
+)
 from utils.many_utils import (
     cancella_account,
     logo_and_page_title,
-    ottieni_conti_correnti,
+    # ottieni_conti_correnti,
+    ottieni_conti_correnti_mongo,
 )
 from utils.many_utils import PATH
 from utils.session_utils import (
@@ -41,25 +52,29 @@ def login():
 
     # Utente loggato
     if st.session_state["user"]:
+        uri = st.session_state["mongo_uri"]
         st.title(f"Ciao, {st.session_state.user.title()}!")
-        st.success("<- Ora puoi navigare tra le pagine")
-        crea_tabella_utente(st.session_state["user"])
-        crea_tabella_scadenze(st)
+        st.toast("<- Ora puoi navigare tra le pagine")
+        crea_tabella_utente_mongo(st.session_state["user"], uri)
+        crea_tabella_scadenze_mongo(st, uri)
 
         #### CARDS
 
-        if len(ottieni_conti_correnti(st.session_state["user"])) > 0:
+        if len(ottieni_conti_correnti_mongo(st.session_state["user"], uri)) > 0:
             # Cards
             st.markdown("---")
             with st.expander("Situazione finanziaria", True):
                 # st.markdown("## Situazione finanziaria")
                 card_cols = st.columns(2)
-                conti = ottieni_conti_correnti(st.session_state["user"])
+                conti = ottieni_conti_correnti_mongo(st.session_state["user"], uri)
                 i = 0
                 for conto_corrente in conti:
                     with card_cols[i % 2]:
-                        DB = Path(PATH, f"utente_{st.session_state.user}.db")
-                        storico = andamento_patrimonio(DB, conto_corrente)
+                        # DB = Path(PATH, f"utente_{st.session_state.user}.db")
+                        # storico = andamento_patrimonio(DB, conto_corrente)
+                        storico = andamento_patrimonio_mongo(
+                            st.session_state["user"], conto_corrente, uri
+                        )
                         value = storico.tail(1)["patrimonio"].values[0].round(2)
                         card(
                             title=conto_corrente,
@@ -75,7 +90,7 @@ def login():
         # Scadenze
         with st.expander("Scadenze", True):
             # st.markdown("## Scadenze")
-            scadenze = get_scadenze(st)
+            scadenze = get_scadenze_mongo(st, uri)
             scadenze_non_completate = scadenze[scadenze["completata"].lt(1)]
             if scadenze_non_completate.shape[0] > 0:
                 st.warning("Scadenze in avvicinamento")
@@ -119,7 +134,7 @@ def login():
                     "https://media.giphy.com/media/o0eOCNkn7cSD6/giphy.gif",
                     use_column_width=False,
                 )
-                st.success(
+                st.toast(
                     "Hai eliminato l'account. Verrai rispedito alla pagina di login a breve."
                 )
                 sleep(4)
@@ -128,7 +143,7 @@ def login():
         if st.button("Logout"):
             st.session_state["user"] = None
             st.session_state["password"] = None
-            st.success("Hai effettuato il logout")
+            st.toast("Hai effettuato il logout")
             rimuovi_sessione_attiva(st)
             st.experimental_rerun()
         st.stop()
@@ -147,28 +162,47 @@ def login():
         # Controllo dell'autenticazione
         if st.button("Accedi"):
             # Input del nome utente
-            if autenticazione(st, username, password, persistenza):
-                st.success("Accesso effettuato con successo.")
-                st.experimental_rerun()
-            else:
-                st.error("Nome utente o password non validi.")
+            try:
+                if autenticazione(st, username, password, persistenza):
+                    st.toast("Accesso effettuato con successo.")
+                    st.experimental_rerun()
+                else:
+                    st.error("Nome utente o password non validi.")
+            except Exception as e:
+                st.error("Errore nel recupero dell'utente")
+                st.write(e)
 
     with st.expander("**REGISTRAZIONE**"):
         # st.title("Registrazione")
+        data = "mongodb+srv://<USER>:<Password>@.........mongodb.net"
+        if os.path.exists(Path("..", "creds", "creds.json")):
+            with open(Path("..", "creds", "creds.json"), "r") as f:
+                data = json.load(f)["uri"]
 
         new_username = st.text_input("Nuovo nome utente")
         new_password = st.text_input("Nuova password", type="password")
+        mongo_uri = st.text_input("Mongo URI", value=data)
 
+        if not mongo_uri.endswith("/?retryWrites=true&w=majority"):
+            mongo_uri = mongo_uri + "/?retryWrites=true&w=majority"
         if st.button("Registra"):
-            esito = crea_utente(st, new_username, new_password)
-            if esito:
-                st.success(
-                    "Registrazione effettuata con successo. Ora puoi effettuare l'accesso."
-                )
-                st.warning(
-                    "Attenzione! Su questo server gli utenti potrebbero cancellarsi in seguito a rilasci o a pulizia del dominio del server.\nCi dispiace per l'inconveniente."
-                )
-                st.balloons()
+            if (
+                new_username != ""
+                and new_password != ""
+                and mongo_uri != "mongodb+srv://<USER>:<Password>@.........mongodb.net"
+                and mongo_uri != ""
+            ):
+                esito = crea_utente(st, new_username, new_password, mongo_uri)
+                if esito:
+                    st.success(
+                        "Registrazione effettuata con successo. Ora puoi effettuare l'accesso."
+                    )
+                    st.warning(
+                        "Attenzione! Su questo server gli utenti potrebbero cancellarsi in seguito a rilasci o a pulizia del dominio del server.\nCi dispiace per l'inconveniente."
+                    )
+                    st.toast("Registrazione completata con successo")
+            else:
+                st.error("Verifica i campi inseriti e riprova")
 
 
 login()

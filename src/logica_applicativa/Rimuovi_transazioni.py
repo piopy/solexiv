@@ -1,7 +1,7 @@
 from pathlib import Path
 import sqlite3
-
-from utils.many_utils import PATH
+import pymongo
+from utils.many_utils import PATH, get_collection
 
 
 def rimuovi_transazioni(st, transazioni_selezionate, conto_corrente_selezionato):
@@ -16,6 +16,7 @@ def rimuovi_transazioni(st, transazioni_selezionate, conto_corrente_selezionato)
     conn.commit()
 
     conn.close()
+    return True
 
 
 def select_all_transazioni(st, conto_corrente_selezionato):
@@ -27,4 +28,42 @@ def select_all_transazioni(st, conto_corrente_selezionato):
     )
     transazioni = cursor.fetchall()
     conn.close()
+    return transazioni
+
+
+################## Mongo
+
+
+def rimuovi_transazioni_mongo(st, transazioni_selezionate, conto_corrente_selezionato):
+    transazioni_col = get_collection(
+        st.session_state["user"],
+        "utente",
+        st.session_state["mongo_uri"],
+        mongo_db="solexiv_db",
+    )
+
+    for id_transazione in transazioni_selezionate:
+        transazioni_col.delete_one(
+            {
+                "_id": id_transazione["_id"],
+                "conto_corrente": conto_corrente_selezionato,
+            }
+        )
+    st.write("Hai rimosso con successo queste transazioni:")
+    st.write(transazioni_selezionate)
+    return True
+
+
+def select_all_transazioni_mongo(st, conto_corrente_selezionato):
+    transazioni_col = get_collection(
+        st.session_state["user"],
+        "utente",
+        st.session_state["mongo_uri"],
+        mongo_db="solexiv_db",
+    )
+
+    transazioni = transazioni_col.find(
+        {"conto_corrente": conto_corrente_selezionato}
+    ).sort("data", pymongo.DESCENDING)
+
     return transazioni

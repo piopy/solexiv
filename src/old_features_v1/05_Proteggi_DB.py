@@ -25,7 +25,7 @@ if st.session_state["encrypted"] == False:
 
         # Crittografa il database
         crittografa_database(chiave, str(DB))
-        st.success("Il database è stato crittografato con successo!")
+        st.toast("Il database è stato crittografato con successo!")
         st.session_state["encrypted"] = True
         os.remove(DB)
         modifica_session_encrypted(st, True)
@@ -36,7 +36,7 @@ else:
 
         # Decrittografa il database
         decrittografa_database(chiave, str(DB))
-        st.success("Il database è stato decrittografato con successo!")
+        st.toast("Il database è stato decrittografato con successo!")
         st.session_state["encrypted"] = False
         modifica_session_encrypted(st, False)
 

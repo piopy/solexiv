@@ -1,10 +1,11 @@
 from pathlib import Path
 import sqlite3
 from datetime import datetime
+from pymongo import ASCENDING
 
 import pandas as pd
 
-from utils.many_utils import PATH
+from utils.many_utils import PATH, get_collection
 
 
 def inserisci_scadenza(
@@ -98,7 +99,7 @@ def elimina_scadenza(st, id_scadenza):
 
 
 def genera_body_scadenza(s):
-    res_id = s["id"]
+    res_id = s["_id"]
     res_nome = s["nome"]
     res_data_inserimento = s["data_inserimento"]
     res_data_scadenza = s["data_scadenza"]
@@ -119,3 +120,114 @@ def genera_body_scadenza(s):
         Completata: {res_completata}\n\
         Data completamento: {res_data_completamento}\
         "
+
+
+######### Mongo
+
+
+def get_scadenze_mongo(st, mongo_uri):
+    scadenze_col = get_collection(
+        st.session_state["user"],
+        "scadenze",
+        mongo_uri,
+        mongo_db="solexiv_db",
+    )
+
+    scadenze = list(scadenze_col.find().sort("data_scadenza", ASCENDING))
+    cols = [
+        "_id",
+        "nome",
+        "data_inserimento",
+        "data_scadenza",
+        "data_completamento",
+        "dettagli",
+        "importo",
+        "categoria",
+        "frequenza",
+        "notifiche",
+        "completata",
+    ]
+
+    return pd.DataFrame(scadenze, columns=cols).sort_values(
+        "data_scadenza", ascending=True
+    )
+
+
+def inserisci_scadenza_mongo(
+    st,
+    nome,
+    data_scadenza,
+    dettagli,
+    importo,
+    stato,
+    categoria,
+    frequenza,
+    notifiche=False,
+):
+    scadenze_col = get_collection(
+        st.session_state["user"],
+        "scadenze",
+        st.session_state["mongo_uri"],
+        mongo_db="solexiv_db",
+    )
+
+    data_inserimento = datetime.now().strftime("%Y-%m-%d")
+    data_scadenza = data_scadenza.strftime("%Y-%m-%d")
+    data_completamento = None
+    completata = True if stato == "Completata" else False
+
+    scadenza = {
+        "nome": nome,
+        "data_inserimento": data_inserimento,
+        "data_scadenza": data_scadenza,
+        "data_completamento": data_completamento,
+        "dettagli": dettagli,
+        "importo": importo,
+        "categoria": categoria,
+        "frequenza": frequenza,
+        "notifiche": notifiche,
+        "completata": completata,
+    }
+
+    res = scadenze_col.insert_one(scadenza)
+
+    st.toast("Scadenza inserita correttamente.")
+    return True
+
+
+def aggiorna_stato_scadenza_mongo(st, id_scadenza):
+    scadenze_col = get_collection(
+        st.session_state["user"],
+        "scadenze",
+        st.session_state["mongo_uri"],
+        mongo_db="solexiv_db",
+    )
+
+    scadenza = scadenze_col.find_one({"_id": id_scadenza})
+
+    if scadenza:
+        scadenza["completata"] = True
+        scadenza["data_completamento"] = datetime.now().strftime("%Y-%m-%d")
+
+        scadenze_col.update_one({"_id": id_scadenza}, {"$set": scadenza})
+
+        st.toast("Stato della scadenza aggiornato correttamente.")
+    else:
+        st.error("Scadenza non trovata.")
+
+
+def elimina_scadenza_mongo(st, id_scadenza):
+    scadenze_col = get_collection(
+        st.session_state["user"],
+        "scadenze",
+        st.session_state["mongo_uri"],
+        mongo_db="solexiv_db",
+    )
+
+    # Elimina la scadenza corrispondente all'id fornito
+    result = scadenze_col.delete_one({"_id": id_scadenza})
+
+    if result.deleted_count > 0:
+        st.toast("Scadenza eliminata correttamente.")
+    else:
+        st.error("Scadenza non trovata.")
